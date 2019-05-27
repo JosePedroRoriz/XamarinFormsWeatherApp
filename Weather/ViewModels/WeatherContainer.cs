@@ -240,6 +240,7 @@ namespace XamarinFormsWeatherApp.Weather.ViewModels
                     //something can go wrong and if it does, it needs to be logged!
                     try
                     {
+                        //check if its the emulator or the device, i should be getting an exception here
                         Location location = await Geolocation.GetLocationAsync(new GeolocationRequest() { DesiredAccuracy = GeolocationAccuracy.Medium, Timeout = TimeSpan.FromSeconds(2) });
 
                         //this causes erros for now
