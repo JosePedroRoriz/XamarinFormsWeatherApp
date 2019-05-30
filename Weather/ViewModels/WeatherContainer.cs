@@ -235,36 +235,36 @@ namespace XamarinFormsWeatherApp.Weather.ViewModels
                 //get the current location coordinates
                 var request = new GeolocationRequest(GeolocationAccuracy.Medium);
 
-                using (UserDialogs.Instance.Loading("Loading..."))
-                {
-                    //something can go wrong and if it does, it needs to be logged!
-                    try
-                    {
-                        //check if its the emulator or the device, i should be getting an exception here
-                        Location location = await Geolocation.GetLocationAsync(new GeolocationRequest() { DesiredAccuracy = GeolocationAccuracy.Medium, Timeout = TimeSpan.FromSeconds(2) });
+                //using (UserDialogs.Instance.Loading("Loading..."))
+                //{
+                //    //something can go wrong and if it does, it needs to be logged!
+                //    try
+                //    {
+                //        //check if its the emulator or the device, i should be getting an exception here
+                //        //Location location = await Geolocation.GetLocationAsync(new GeolocationRequest() { DesiredAccuracy = GeolocationAccuracy.Medium, Timeout = TimeSpan.FromSeconds(2) });
 
-                        //this causes erros for now
-                        //get the city & country
-                        //var placemarks = await Geocoding.GetPlacemarksAsync(location.Latitude, location.Longitude);
-                        //var placemark = placemarks?.FirstOrDefault();
+                //        //this causes erros for now
+                //        //get the city & country
+                //        //var placemarks = await Geocoding.GetPlacemarksAsync(location.Latitude, location.Longitude);
+                //        //var placemark = placemarks?.FirstOrDefault();
 
-                        //if (placemark != null)
-                        //{
-                        //    CountryName = placemark.CountryName;
-                        //    CountryCode = placemark.CountryCode;
-                        //    CityName = placemark.FeatureName;
-                        //}
+                //        //if (placemark != null)
+                //        //{
+                //        //    CountryName = placemark.CountryName;
+                //        //    CountryCode = placemark.CountryCode;
+                //        //    CityName = placemark.FeatureName;
+                //        //}
 
-                        await GetWeatherReport(request, false, location);
-                    }
+                //        //await GetWeatherReport(request, false, location);
+                //    }
 
-                    catch (Exception ex)
-                    {
-                        Analytics.TrackEvent("Something went wrong with the api call");
-                        Crashes.TrackError(ex);
-                    }
-                }
-                UserDialogs.Instance.HideLoading();
+                //    catch (Exception ex)
+                //    {
+                //        Analytics.TrackEvent("Something went wrong with the api call");
+                //        Crashes.TrackError(ex);
+                //    }
+                //}
+                //UserDialogs.Instance.HideLoading();
             }
             catch (FeatureNotSupportedException fnsEx)
             {

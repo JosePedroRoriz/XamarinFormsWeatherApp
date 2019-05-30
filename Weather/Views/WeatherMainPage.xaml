@@ -6,26 +6,15 @@
              xmlns:d="http://xamarin.com/schemas/2014/forms/design"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
-                      xmlns:viewModels="clr-namespace:XamarinFormsWeatherApp.Weather.ViewModels;assembly=XamarinFormsWeatherApp"
-            xmlns:weatherView="clr-namespace:XamarinFormsWeatherApp.Weather.Views"
-            x:Class="XamarinFormsWeatherApp.Weather.Views.WeatherMainPage">
-    
-    
+             xmlns:viewModels="clr-namespace:XamarinFormsWeatherApp.Weather.ViewModels;assembly=XamarinFormsWeatherApp"
+             xmlns:weatherView="clr-namespace:XamarinFormsWeatherApp.Weather.Views"
+             xmlns:localize ="clr-namespace:XamarinFormsWeatherApp.Localizations"
+             x:Class="XamarinFormsWeatherApp.Weather.Views.WeatherMainPage">
+
+
     <TabbedPage.Children>
 
-        <NavigationPage Title="Today">
-            <NavigationPage.Icon>
-                <OnPlatform x:TypeArguments="FileImageSource">
-                    <On Platform="iOS" Value="tab_feed.png"/>
-                </OnPlatform>
-            </NavigationPage.Icon>
-            <x:Arguments>
-                <!-- same thing as datacontext in wpf-->
-                <weatherView:WeatherPage  />
-            </x:Arguments>
-        </NavigationPage>
-
-        <NavigationPage Title="Tomorrow">
+        <NavigationPage Title="{x:Static localize:WeatherMainPageLocalization.TODAY}">
             <NavigationPage.Icon>
                 <OnPlatform x:TypeArguments="FileImageSource">
                     <On Platform="iOS" Value="tab_feed.png"/>
@@ -36,7 +25,18 @@
             </x:Arguments>
         </NavigationPage>
 
-        <NavigationPage Title="5 Days">
+        <NavigationPage Title="{x:Static localize:WeatherMainPageLocalization.TOMORROW}">
+            <NavigationPage.Icon>
+                <OnPlatform x:TypeArguments="FileImageSource">
+                    <On Platform="iOS" Value="tab_feed.png"/>
+                </OnPlatform>
+            </NavigationPage.Icon>
+            <x:Arguments>
+                <weatherView:WeatherPage  />
+            </x:Arguments>
+        </NavigationPage>
+
+        <NavigationPage Title="{x:Static localize:WeatherMainPageLocalization._5_DAYS}">
             <NavigationPage.Icon>
                 <OnPlatform x:TypeArguments="FileImageSource">
                     <On Platform="iOS" Value="tab_about.png"/>
