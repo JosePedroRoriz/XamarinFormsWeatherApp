@@ -1,8 +1,9 @@
-﻿using Acr.UserDialogs;
+using Acr.UserDialogs;
 using MvvmCross;
 using MvvmCross.IoC;
 using MvvmCross.ViewModels;
 using System.Globalization;
+using System.Threading;
 using Xamarin.Forms;
 using XamarinFormsWeatherApp.Localizations;
 
@@ -18,6 +19,8 @@ namespace XamarinFormsWeatherApp
                 WeatherMainPageLocalization.Culture = ci;
                 DependencyService.Get<ILocalize>().SetLocale(ci);
             }
+
+            Akavache.BlobCache.ApplicationName = "XamarinFormsWeatherApp";
 
             //uncomment to test pt strings
             //WeatherMainPageLocalization.Culture = new CultureInfo("pt-PT");

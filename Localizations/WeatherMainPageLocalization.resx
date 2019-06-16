@@ -120,10 +120,37 @@
   <data name="5_DAYS" xml:space="preserve">
     <value>5 Days</value>
   </data>
+  <data name="ERROR_GETTING_WEATHER_FORECAST" xml:space="preserve">
+    <value>Error getting weather forecast</value>
+  </data>
+  <data name="ERROR_NO_INTERNET" xml:space="preserve">
+    <value>No internet connection</value>
+  </data>
+  <data name="HUMIDITY" xml:space="preserve">
+    <value>Humidity</value>
+  </data>
+  <data name="PRESSURE" xml:space="preserve">
+    <value>Pressure</value>
+  </data>
+  <data name="TEMPERATURE" xml:space="preserve">
+    <value>Temperature</value>
+  </data>
   <data name="TODAY" xml:space="preserve">
     <value>Today</value>
   </data>
   <data name="TOMORROW" xml:space="preserve">
     <value>Tomorrow</value>
+  </data>
+  <data name="UV_INDEX" xml:space="preserve">
+    <value>UV Index</value>
+  </data>
+  <data name="WEATHER_CONDITION" xml:space="preserve">
+    <value>Weather Condition</value>
+  </data>
+  <data name="WEATHER_DETAILS" xml:space="preserve">
+    <value>Weather Details</value>
+  </data>
+  <data name="WIND" xml:space="preserve">
+    <value>Wind</value>
   </data>
 </root>

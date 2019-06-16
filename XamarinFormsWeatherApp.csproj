@@ -20,10 +20,13 @@
 
   <ItemGroup>
     <PackageReference Include="Acr.UserDialogs" Version="7.0.4" />
+    <PackageReference Include="akavache" Version="6.5.9" />
+    <PackageReference Include="akavache.sqlite3" Version="6.5.9" />
     <PackageReference Include="Microsoft.AppCenter.Analytics" Version="2.0.0" />
     <PackageReference Include="Microsoft.AppCenter.Crashes" Version="2.0.0" />
     <PackageReference Include="MvvmCross.Forms" Version="6.3.0" />
-    <PackageReference Include="Xamarin.Forms" Version="4.0.0.425677" />  
+    <PackageReference Include="Refractored.XamForms.PullToRefresh" Version="2.4.1" />
+    <PackageReference Include="Xamarin.Forms" Version="4.0.0.482894" />  
     <PackageReference Include="Xamarin.Essentials" Version="1.1.0" />
   </ItemGroup>
 
@@ -36,6 +39,9 @@
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>WeatherMainPageLocalization.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Weather\Views\ForecastInformation.xaml.cs">
+      <DependentUpon>ForecastInformation.xaml</DependentUpon>
     </Compile>
   </ItemGroup>
 
@@ -50,16 +56,18 @@
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>WeatherMainPageLocalization.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Update="Weather\Views\WeatherMainPage.xaml">
+    <EmbeddedResource Update="MainContainer\Views\MainContainerPage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="Weather\Views\WeatherPage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
+    <EmbeddedResource Update="Weather\Views\ForecastInformation.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="HelperClasses\" />
     <Folder Include="Services\" />
   </ItemGroup>
 </Project>

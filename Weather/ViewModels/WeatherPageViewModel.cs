@@ -1,54 +1,51 @@
-﻿using MvvmCross.ViewModels;
+using MvvmCross.ViewModels;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using WeatherWebservices.OpenWeatherModels;
+using Xamarin.Essentials;
 using Xamarin.Forms;
+using XamarinFormsWeatherApp.Weather.Models;
 
 namespace XamarinFormsWeatherApp.Weather.ViewModels
 {
-    public class WeatherPageViewModel : MvxViewModel
+    public class WeatherPageViewModel : WeatherViewModel
     {
         #region Variables
 
         private DateTime _date;
-        private Wind _wind;
-        private MvxObservableCollection<Wind> _windCollection;
-
-        private WeatherWebservices.OpenWeatherModels.Weather _weather;
-        private string _country;
-        private string _location;
         private Main _weatherMain;
-        private ImageSource _imageSource;
+
         private MvxObservableCollection<WeatherWebservices.OpenWeatherModels.Weather> _weatherCollection;
-        private MvxObservableCollection<Main> _weatherMainCollection;
         private MvxObservableCollection<Clouds> _cloudsCollection;
-        private MvxObservableCollection<DateTime> _dateCollection;
+        private MvxObservableCollection<TemperatureInformation> _temperatureInformationCollection;
+        private MvxObservableCollection<WindInformation> _windInformationCollection;
+        private string _currentUvIndex;
+        private string _currentHumidity;
+        private string _curentPressure;
+        private string _sunsetSunrise;
+        private string _currentWeatherDescription;
+        private MvxObservableCollection<SysInformation> _systemInformationCollection;
 
         #endregion
 
         #region Constructor
-        public WeatherPageViewModel(RootObject rootObject)
+        public WeatherPageViewModel()
         {
-            CurrentWind = rootObject.wind;
-            Country = rootObject.sys.country;
-            WeatherMain = rootObject.main;
+
         }
 
-        /// <summary>
-        /// List is an OpenWeatherReport class
-        /// </summary>
-        /// <param name="reportList"></param>
         public WeatherPageViewModel(List reportList, DateTime date)
         {
             Date = date;
-            CurrentWind = reportList.wind;
 
-            WindCollection = new MvxObservableCollection<Wind> { reportList.wind };
             WeatherCollection = new MvxObservableCollection<WeatherWebservices.OpenWeatherModels.Weather> { reportList.weather[0] };
-            WeatherMainCollection = new MvxObservableCollection<Main> { reportList.main };
+            IsDataValid = true;
             CloudsCollection = new MvxObservableCollection<Clouds> { reportList.clouds };
-            DateCollection = new MvxObservableCollection<DateTime> { date };
+
+            TemperatureInformationCollection = new MvxObservableCollection<TemperatureInformation> { new TemperatureInformation(date, reportList.main) };
+            WindInformationCollection = new MvxObservableCollection<WindInformation> { new WindInformation(date, reportList.wind) };
+
+            //waiting on a api update so i can use this...
+            //SystemInformationCollection = new MvxObservableCollection<SysInformation> { new SysInformation(date, reportList.sys) };
         }
 
         #endregion
@@ -65,36 +62,6 @@ namespace XamarinFormsWeatherApp.Weather.ViewModels
             }
         }
 
-        public MvxObservableCollection<DateTime> DateCollection
-        {
-            get => _dateCollection;
-            set
-            {
-                _dateCollection = value;
-                RaisePropertyChanged(() => DateCollection);
-            }
-        }
-
-        public Wind CurrentWind
-        {
-            get => _wind;
-            set
-            {
-                _wind = value;
-                RaisePropertyChanged(() => CurrentWind);
-            }
-        }
-
-        public MvxObservableCollection<Wind> WindCollection
-        {
-            get => _windCollection;
-            set
-            {
-                _windCollection = value;
-                RaisePropertyChanged(() => WindCollection);
-            }
-        }
-
         public MvxObservableCollection<WeatherWebservices.OpenWeatherModels.Weather> WeatherCollection
         {
             get => _weatherCollection;
@@ -102,26 +69,6 @@ namespace XamarinFormsWeatherApp.Weather.ViewModels
             {
                 _weatherCollection = value;
                 RaisePropertyChanged(() => WeatherCollection);
-            }
-        }
-
-        public string Country
-        {
-            get => _country;
-            set
-            {
-                _country = value;
-                RaisePropertyChanged(() => Country);
-            }
-        }
-
-        public string Location
-        {
-            get => _location;
-            set
-            {
-                _location = value;
-                RaisePropertyChanged(() => Location);
             }
         }
 
@@ -135,23 +82,23 @@ namespace XamarinFormsWeatherApp.Weather.ViewModels
             }
         }
 
-        public MvxObservableCollection<Main> WeatherMainCollection
+        public MvxObservableCollection<TemperatureInformation> TemperatureInformationCollection
         {
-            get => _weatherMainCollection;
+            get => _temperatureInformationCollection;
             set
             {
-                _weatherMainCollection = value;
-                RaisePropertyChanged(() => WeatherMainCollection);
+                _temperatureInformationCollection = value;
+                RaisePropertyChanged(() => TemperatureInformationCollection);
             }
         }
 
-        public ImageSource WeatherIcon
+        public MvxObservableCollection<WindInformation> WindInformationCollection
         {
-            get => _imageSource;
+            get => _windInformationCollection;
             set
             {
-                _imageSource = value;
-                RaisePropertyChanged(() => WeatherIcon);
+                _windInformationCollection = value;
+                RaisePropertyChanged(() => WindInformationCollection);
             }
         }
 
@@ -164,6 +111,68 @@ namespace XamarinFormsWeatherApp.Weather.ViewModels
                 RaisePropertyChanged(() => CloudsCollection);
             }
         }
+
+        public MvxObservableCollection<SysInformation> SystemInformationCollection
+        {
+            get => _systemInformationCollection;
+            set
+            {
+                _systemInformationCollection = value;
+                RaisePropertyChanged(() => SystemInformationCollection);
+            }
+        }
+
+        public string CurrentUvIndex
+        {
+            get => _currentUvIndex;
+            set
+            {
+                _currentUvIndex = value;
+                RaisePropertyChanged(() => CurrentUvIndex);
+            }
+        }
+
+        public string CurrentHumidity
+        {
+            get => _currentHumidity;
+            set
+            {
+                _currentHumidity = value;
+                RaisePropertyChanged(() => CurrentHumidity);
+            }
+        }
+
+        public string CurentPressure
+        {
+            get => _curentPressure;
+            set
+            {
+                _curentPressure = value;
+                RaisePropertyChanged(() => CurentPressure);
+            }
+        }
+
+        public string CurrentWeatherDescription
+        {
+            get => _currentWeatherDescription;
+            set
+            {
+                _currentWeatherDescription = value;
+                RaisePropertyChanged(() => CurrentWeatherDescription);
+            }
+        }
+
+        //waiting on the api to add this to the week prediction and not do several calls for this, it comes in xml but not json for the same request
+        public string SunsetSunrise
+        {
+            get => _sunsetSunrise;
+            set
+            {
+                _sunsetSunrise = value;
+                RaisePropertyChanged(() => SunsetSunrise);
+            }
+        }
+
         #endregion
     }
 }

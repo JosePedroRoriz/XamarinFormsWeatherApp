@@ -1,15 +1,19 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <Application xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:class="clr-namespace:XamarinFormsWeatherApp.Converters"
              x:Class="XamarinFormsWeatherApp.AppStyles">
     <Application.Resources>
-
-        <!--  Application resource dictionary  -->
         <ResourceDictionary>
-            <!--<ResourceDictionary.MergedDictionaries>
-                <resources:Colors />
-            </ResourceDictionary.MergedDictionaries>-->
+            <class:HideGridElementOnNull  x:Key="HideGridElementOnNull"/>
+            <class:ToUpperOrLower x:Key="ToUpperOrLower" />
+            <class:UpperCaseFirstLetter x:Key="UpperCaseFirstLetter" />
+            <class:InverseBooleanConverter x:Key="InverseBooleanConverter" />
+            <Color x:Key="NavigationPrimary">#2196F3</Color>
+            <Style TargetType="NavigationPage">
+                <Setter Property="BarBackgroundColor" Value="{StaticResource NavigationPrimary}" />
+                <Setter Property="BarTextColor" Value="White" />
+            </Style>
         </ResourceDictionary>
-
     </Application.Resources>
 </Application>

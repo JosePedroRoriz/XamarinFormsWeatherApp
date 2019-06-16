@@ -5,46 +5,16 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:d="http://xamarin.com/schemas/2014/forms/design"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             mc:Ignorable="d"
-             xmlns:viewModels="clr-namespace:XamarinFormsWeatherApp.Weather.ViewModels;assembly=XamarinFormsWeatherApp"
+             mc:Ignorable="d"           
              xmlns:weatherView="clr-namespace:XamarinFormsWeatherApp.Weather.Views"
-             xmlns:localize ="clr-namespace:XamarinFormsWeatherApp.Localizations"
+             xmlns:viewModels="clr-namespace:XamarinFormsWeatherApp.Weather.ViewModels;assembly=XamarinFormsWeatherApp"
+             xmlns:localize ="clr-namespace:XamarinFormsWeatherApp.Localizations"    
+                          IsVisible="{Binding IsFinishedLoading}"
              x:Class="XamarinFormsWeatherApp.Weather.Views.WeatherMainPage">
 
-
     <TabbedPage.Children>
-
-        <NavigationPage Title="{x:Static localize:WeatherMainPageLocalization.TODAY}">
-            <NavigationPage.Icon>
-                <OnPlatform x:TypeArguments="FileImageSource">
-                    <On Platform="iOS" Value="tab_feed.png"/>
-                </OnPlatform>
-            </NavigationPage.Icon>
-            <x:Arguments>
-                <weatherView:WeatherPage  />
-            </x:Arguments>
-        </NavigationPage>
-
-        <NavigationPage Title="{x:Static localize:WeatherMainPageLocalization.TOMORROW}">
-            <NavigationPage.Icon>
-                <OnPlatform x:TypeArguments="FileImageSource">
-                    <On Platform="iOS" Value="tab_feed.png"/>
-                </OnPlatform>
-            </NavigationPage.Icon>
-            <x:Arguments>
-                <weatherView:WeatherPage  />
-            </x:Arguments>
-        </NavigationPage>
-
-        <NavigationPage Title="{x:Static localize:WeatherMainPageLocalization._5_DAYS}">
-            <NavigationPage.Icon>
-                <OnPlatform x:TypeArguments="FileImageSource">
-                    <On Platform="iOS" Value="tab_about.png"/>
-                </OnPlatform>
-            </NavigationPage.Icon>
-            <x:Arguments>
-                <weatherView:WeatherPage  />
-            </x:Arguments>
-        </NavigationPage>
+        <weatherView:WeatherPage BindingContext="{Binding Forecast, Mode=TwoWay}" Title="{x:Static localize:WeatherMainPageLocalization.TODAY}"/>
+        <weatherView:WeatherPage BindingContext="{Binding TomorrowForecast, Mode=TwoWay}" Title="{x:Static localize:WeatherMainPageLocalization.TOMORROW}" />
+        <weatherView:ForecastInformation BindingContext="{Binding ForecastInformation}" Title="{x:Static localize:WeatherMainPageLocalization._5_DAYS}"/>
     </TabbedPage.Children>
 </tabbedPage:MvxTabbedPage>

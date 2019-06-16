@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
-namespace XamarinFormsWeatherApp
+namespace XamarinFormsWeatherApp.MainContainer.Views
 {
-   // [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class AppStyles : Application
+    [XamlCompilation(XamlCompilationOptions.Compile)]
+    public partial class MainContainerPage : ContentPage
     {
-        public AppStyles()
+        public MainContainerPage()
         {
             InitializeComponent();
         }

@@ -7,86 +7,119 @@
              xmlns:d="http://xamarin.com/schemas/2014/forms/design"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
+             xmlns:localize ="clr-namespace:XamarinFormsWeatherApp.Localizations"
+             xmlns:controls="clr-namespace:Refractored.XamForms.PullToRefresh;assembly=Refractored.XamForms.PullToRefresh"
              x:Class="XamarinFormsWeatherApp.Weather.Views.WeatherPage">
+
     <ContentPage.Content>
-        <StackLayout>
-            <Label Text="{Binding testLabel}"
-                VerticalOptions="CenterAndExpand" 
-                HorizontalOptions="CenterAndExpand" />
-        </StackLayout>
-        <!--<Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition />
-                <RowDefinition />
-                <RowDefinition />
-            </Grid.RowDefinitions>
+        <controls:PullToRefreshLayout x:Name="PullToRefreshLayout"
+          IsPullToRefreshEnabled="True"
+          RefreshCommand="{Binding RefreshData}"
+          IsRefreshing="{Binding IsBusy}"
+          RefreshColor="Blue">
 
-            --><!-- Update this to use RefreshView when its implemented -->
-            <!--<ListView IsPullToRefreshEnabled="True"
-                    RefreshCommand="{Binding RefreshCommand}"
-                    IsRefreshing="{Binding IsRefreshing}">
+            <ScrollView Orientation="Vertical">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Grid Padding="5" IsVisible="{Binding IsDataValid}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="auto"/>
+                        </Grid.ColumnDefinitions>
 
-                -->
-            <!-- To test some refresh behaviors -->
-            <!--<ListView.ItemsSource>
-                    <x:Array Type="{x:Type x:String}">
-                        <x:String>mono</x:String>
-                        <x:String>monodroid</x:String>
-                        <x:String>monotouch</x:String>
-                        <x:String>monorail</x:String>
-                        <x:String>monodevelop</x:String>
-                        <x:String>monotone</x:String>
-                        <x:String>monopoly</x:String>
-                        <x:String>monomodal</x:String>
-                        <x:String>mononucleosis</x:String>
-                    </x:Array>
-                </ListView.ItemsSource>-->
-            <!--
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Label Text="{x:Static localize:WeatherMainPageLocalization.TEMPERATURE}" FontAttributes="Bold"/>
+                            <ScrollView Orientation="Horizontal" Grid.Row="1">
+                                <StackLayout Orientation = "Horizontal" BindableLayout.ItemsSource = "{Binding TemperatureInformationCollection}" >
+                                    <BindableLayout.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height = "auto" />
+                                                    <RowDefinition Height = "auto" />
+                                                </Grid.RowDefinitions>
+                                                <Label Text="{Binding WeatherMain.temp, StringFormat='{0}º'}" />
+                                                <Label Grid.Row="1" Text="{Binding DayForecast, StringFormat='{}{0:HH:mm}'}" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </BindableLayout.ItemTemplate>
+                                </StackLayout>
+                            </ScrollView>
+                        </Grid>
 
-            </ListView>--><!--
+                        <Grid Grid.Row="1" Padding="0,0,5,5">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Label Text="{x:Static localize:WeatherMainPageLocalization.WIND}" FontAttributes="Bold"/>
 
-            <StackLayout Orientation="Horizontal" HorizontalOptions="Center">
-                <Label Text="{Binding CurrentTempMode}" TextColor="Red"/>
-                <Switch IsToggled="{Binding IsCelsiusSelected}" >
-                    <Switch.Behaviors>
-                        <behaviors:EventHandlerBehavior EventName="Toggled">
-                            <behaviors:InvokeCommandAction Command="{Binding ToggleSwitchCommand}" />
-                        </behaviors:EventHandlerBehavior>
-                    </Switch.Behaviors>
-                </Switch>
-            </StackLayout>
+                            <ScrollView Grid.Row="1" Orientation="Horizontal">
+                                <StackLayout BindableLayout.ItemsSource = "{Binding WindInformationCollection}" Orientation="Horizontal">
+                                    <BindableLayout.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="auto"/>
+                                                    <RowDefinition Height="auto"/>
+                                                </Grid.RowDefinitions>
+                                                <Label Text="{Binding Wind.speed, StringFormat='{0} Km/h'}" />
+                                                <Label Grid.Row="1" Text="{Binding DayForecast, StringFormat='{}{0:HH:mm}'}"/>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </BindableLayout.ItemTemplate>
+                                </StackLayout>
+                            </ScrollView>
+                        </Grid>
 
-            <Grid Grid.Row="1">
-                <Grid.ColumnDefinitions >
-                    <ColumnDefinition />
-                    <ColumnDefinition />
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition />
-                    <RowDefinition />
-                    <RowDefinition />
-                    <RowDefinition />
-                </Grid.RowDefinitions>
-                <Label Text="Forecast" VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand" />
-                <Label Grid.Column="1" Text="{Binding Forecast.Country}" VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand" />
+                        <Grid Grid.Row="2" Padding="0,0,5,5">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="{Binding CurrentUvIndex, Converter={StaticResource HideGridElementOnNull}}" />
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="auto"/>
+                                <ColumnDefinition Width="auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Label Grid.ColumnSpan="2" Text="{x:Static localize:WeatherMainPageLocalization.WEATHER_DETAILS}" FontAttributes="Bold" />
 
-                <Label Grid.Row="1" Grid.ColumnSpan="2" Text="{Binding Forecast.WeatherMain.temp}" VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand" TextColor="Brown"/>
-                <Label Grid.Row="2" Grid.ColumnSpan="2" Text="{Binding Forecast.WeatherMain.humidity}" VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand" />
-                <Label Grid.Row="3" Text="{Binding Forecast.WeatherMain.temp_min}" VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand" />
-                <Label Grid.Row="3" Grid.Column="1" Text="{Binding Forecast.WeatherMain.temp_max}" VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand" />
+                            <Label Grid.Row="1" Grid.Column="0" Text="{x:Static localize:WeatherMainPageLocalization.UV_INDEX}" />
+                            <Label Grid.Row="1" Grid.Column="1" Text="{Binding CurrentUvIndex}" x:Name="UvIndex" FontAttributes="Bold"/>
 
-            </Grid>
+                            <Label Grid.Row="2" Grid.Column="0" Text="{x:Static localize:WeatherMainPageLocalization.HUMIDITY}" />
+                            <Label Grid.Row="2" Grid.Column="1" Text="{Binding CurrentHumidity, StringFormat='{0}%'}" FontAttributes="Bold"/>
 
-            <StackLayout Grid.Row="2">
-                <Label Text="{Binding Forecast.CurrentWind.speed}" VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand" />
-                <Label Text="{Binding Forecast.CurrentWind.deg}" VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand" />
+                            <Label Grid.Row="3" Grid.Column="0" Text="{x:Static localize:WeatherMainPageLocalization.PRESSURE}" />
+                            <Label Grid.Row="3" Grid.Column="1" Text="{Binding CurentPressure, StringFormat='{0} mBar'}" FontAttributes="Bold"/>
 
-                <Label Text="{Binding Forecast.CurrentWeather.main}" VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand" />
-                <Label Text="{Binding Forecast.CurrentWeather.desc}" VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand" />
-                <Label Text="{Binding Forecast.CurrentWeather.icon}" VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand" />
-            </StackLayout>
-        </Grid>-->
+                            <Label Grid.Row="4" Grid.Column="0" Text="{x:Static localize:WeatherMainPageLocalization.WEATHER_CONDITION}" />
+                            <Label Grid.Row="4" Grid.Column="1" Text="{Binding CurrentWeatherDescription, Converter={StaticResource UpperCaseFirstLetter}}" FontAttributes="Bold"/>
+                        </Grid>
+                        
+                    </Grid>
 
-
+                    <Grid IsVisible="{Binding IsDataValid, Converter={StaticResource InverseBooleanConverter}}">
+                        <Label Text="{Binding Message}" HorizontalTextAlignment="Center" VerticalOptions="Center"/>
+                    </Grid>
+                </Grid>
+            </ScrollView>
+        </controls:PullToRefreshLayout>
     </ContentPage.Content>
 </views:MvxContentPage>

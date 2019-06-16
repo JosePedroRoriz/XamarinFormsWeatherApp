@@ -70,6 +70,51 @@ namespace XamarinFormsWeatherApp.Localizations {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Error getting weather forecast.
+        /// </summary>
+        public static string ERROR_GETTING_WEATHER_FORECAST {
+            get {
+                return ResourceManager.GetString("ERROR_GETTING_WEATHER_FORECAST", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No internet connection.
+        /// </summary>
+        public static string ERROR_NO_INTERNET {
+            get {
+                return ResourceManager.GetString("ERROR_NO_INTERNET", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Humidity.
+        /// </summary>
+        public static string HUMIDITY {
+            get {
+                return ResourceManager.GetString("HUMIDITY", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Pressure.
+        /// </summary>
+        public static string PRESSURE {
+            get {
+                return ResourceManager.GetString("PRESSURE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Temperature.
+        /// </summary>
+        public static string TEMPERATURE {
+            get {
+                return ResourceManager.GetString("TEMPERATURE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Today.
         /// </summary>
         public static string TODAY {
@@ -84,6 +129,42 @@ namespace XamarinFormsWeatherApp.Localizations {
         public static string TOMORROW {
             get {
                 return ResourceManager.GetString("TOMORROW", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to UV Index.
+        /// </summary>
+        public static string UV_INDEX {
+            get {
+                return ResourceManager.GetString("UV_INDEX", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Weather Condition.
+        /// </summary>
+        public static string WEATHER_CONDITION {
+            get {
+                return ResourceManager.GetString("WEATHER_CONDITION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Weather Details.
+        /// </summary>
+        public static string WEATHER_DETAILS {
+            get {
+                return ResourceManager.GetString("WEATHER_DETAILS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Wind.
+        /// </summary>
+        public static string WIND {
+            get {
+                return ResourceManager.GetString("WIND", resourceCulture);
             }
         }
     }

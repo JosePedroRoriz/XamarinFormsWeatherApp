@@ -1,15 +1,17 @@
-﻿using Acr.UserDialogs;
+using Acr.UserDialogs;
+using Akavache;
 using Microsoft.AppCenter.Analytics;
 using Microsoft.AppCenter.Crashes;
 using MvvmCross;
-using MvvmCross.Commands;
+using MvvmCross.Navigation;
 using MvvmCross.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
-using System.Windows.Input;
+using WeatherWebservices;
 using WeatherWebservices.OpenWeatherModels;
 using WebServices;
 using Xamarin.Essentials;
@@ -21,30 +23,40 @@ namespace XamarinFormsWeatherApp.Weather.ViewModels
     {
         #region Variables
 
-        private readonly WeatherWebServiceProvider _weatherWebServiceProvider;
         private WeatherPageViewModel _forecast;
         private WeatherPageViewModel _tomorrowForecast;
-        private MvxObservableCollection<WeatherPageViewModel> _current5DayForecast;
+        private ForecastInformationViewModel _forecastInformation;
         private bool _isCelsiusSelected;
         private string _currentTempMode;
         private string _countryName;
         private string _countryCode;
         private string _cityName;
+        private string _selectedCity;
         private bool _isRefreshing;
 
         private const string Fahrenheit = "Fº";
         private const string Celsius = "Cº";
 
+        private readonly IMvxNavigationService _navigationService;
+        private IOpenWeather _openWeather;
+        private bool _isFinishedLoading;
+
+        private List<WeatherPageViewModel> currentForecast;
+
         #endregion
 
         #region Constructor
 
-        public WeatherContainer()
+        public WeatherContainer(IMvxNavigationService navigation)
         {
             IsCelsiusSelected = true;
             CurrentTempMode = Celsius;
 
-            _weatherWebServiceProvider = WeatherWebServiceProvider.Instance;
+            _navigationService = navigation;
+            _openWeather = WeatherWebServiceProvider.Instance;
+
+            _navigationService = navigation ?? throw new ArgumentNullException(nameof(navigation));
+            Connectivity.ConnectivityChanged += Connectivity_ConnectivityChangedAsync;
         }
 
         #endregion
@@ -71,14 +83,13 @@ namespace XamarinFormsWeatherApp.Weather.ViewModels
             }
         }
 
-        //for the collectionView view
-        public MvxObservableCollection<WeatherPageViewModel> Current5DayForecast
+        public ForecastInformationViewModel ForecastInformation
         {
-            get => _current5DayForecast;
+            get => _forecastInformation;
             set
             {
-                _current5DayForecast = value;
-                RaisePropertyChanged(() => Current5DayForecast);
+                _forecastInformation = value;
+                RaisePropertyChanged(() => ForecastInformation);
             }
         }
 
@@ -143,195 +154,250 @@ namespace XamarinFormsWeatherApp.Weather.ViewModels
             }
         }
 
+        public string SelectedCity
+        {
+            get => _selectedCity;
+            set
+            {
+                _selectedCity = value;
+                RaisePropertyChanged(() => SelectedCity);
+            }
+        }
+
+        public bool IsFinishedLoading
+        {
+            get => _isFinishedLoading;
+            set
+            {
+                _isFinishedLoading = value;
+                RaisePropertyChanged(() => IsFinishedLoading);
+            }
+        }
+
         #endregion
 
-        #region Command
+        #region Commands
 
-        private IMvxAsyncCommand _toggleSwitchCommand;
-
-        public IMvxAsyncCommand ToggleSwitchCommand
-        {
-            get
-            {
-                _toggleSwitchCommand = _toggleSwitchCommand ?? new MvxAsyncCommand(ToggleSwitch);
-                return _toggleSwitchCommand;
-            }
-        }
-
-        private async Task ToggleSwitch()
-        {
-            await Task.Run(() =>
-            {
-                //change to fahrenheit 
-                if (IsCelsiusSelected)
-                {
-                    ToFahrenheit();
-                    CurrentTempMode = Fahrenheit;
-                }
-
-                else
-                {
-                    ToCelsius();
-                    CurrentTempMode = Celsius;
-                }
-
-                IsCelsiusSelected = !IsCelsiusSelected;
-            });
-        }
-
-        public ICommand RefreshCommand
-        {
-            get
-            {
-                return new Command(async () =>
-                {
-                    IsRefreshing = true;
-
-                    await RefreshData();
-
-                    IsRefreshing = false;
-                });
-            }
-        }
-
-        private Task RefreshData()
-        {
-            return null;
-        }
-
-        //When the user presses tomorrow, fill the next viewModel
 
         #endregion
 
         #region Private Methods 
 
-        //todo: change to receive the current selected viewModel
-        private void ToFahrenheit()
+        public override async void ViewAppearing()
         {
-            Forecast.WeatherMain.temp = ConvertTempToFahrenheit(Forecast.WeatherMain.temp);
-            Forecast.WeatherMain.temp_max = ConvertTempToFahrenheit(Forecast.WeatherMain.temp_max);
-            Forecast.WeatherMain.temp_min = ConvertTempToFahrenheit(Forecast.WeatherMain.temp_min);
+            await Task.Run(async () =>
+            {
+                try
+                {
+                    var networkAccess = Connectivity.NetworkAccess;
+
+                    if (networkAccess == NetworkAccess.None)
+                    {
+                        // Connection to internet is not available
+                        //use cached information if it exists
+
+                        if (Forecast == null || Forecast.Date == default)
+                        {
+                            MainThread.BeginInvokeOnMainThread(() =>
+                            {
+                                Forecast = new WeatherPageViewModel { IsDataValid = false, Message = Localizations.WeatherMainPageLocalization.ERROR_NO_INTERNET };
+                                TomorrowForecast = new WeatherPageViewModel { IsDataValid = false, Message = Localizations.WeatherMainPageLocalization.ERROR_NO_INTERNET };
+                                ForecastInformation = new ForecastInformationViewModel { IsDataValid = false, Message = Localizations.WeatherMainPageLocalization.ERROR_NO_INTERNET };
+                            });
+                        }
+
+                        IsFinishedLoading = true;
+                    }
+
+                    else
+                    {
+                        await LoadWeatherInformationAsync();
+                    }
+                }
+
+                catch (FeatureNotSupportedException fnsEx)
+                {
+                    // Handle not supported on device exception
+                    Analytics.TrackEvent("FeatureNotSupportedException ");
+                    Crashes.TrackError(fnsEx);
+                }
+                catch (FeatureNotEnabledException fneEx)
+                {
+                    Analytics.TrackEvent("Handle not enabled on device exception ");
+                    Crashes.TrackError(fneEx);
+                }
+                catch (PermissionException pEx)
+                {
+                    Mvx.IoCProvider.Resolve<IUserDialogs>().Alert("Permission to use the currrent location needs to be granted, no data will be loaded");
+                    Analytics.TrackEvent("Handle permission exception");
+                    Crashes.TrackError(pEx);
+                }
+                catch (Exception ex)
+                {
+                    Analytics.TrackEvent("Unable to get location ");
+                    Crashes.TrackError(ex);
+                }
+            });
+
+            base.ViewAppearing();
         }
 
-        private double ConvertTempToFahrenheit(double temp) => (temp * 9 / 5) + 32;
-
-        private void ToCelsius()
+        private async Task LoadWeatherInformationAsync()
         {
-            Forecast.WeatherMain.temp = ConvertTempToCelsius(Forecast.WeatherMain.temp);
-            Forecast.WeatherMain.temp_max = ConvertTempToCelsius(Forecast.WeatherMain.temp_max);
-            Forecast.WeatherMain.temp_min = ConvertTempToCelsius(Forecast.WeatherMain.temp_min);
+            Location location = await Geolocation.GetLastKnownLocationAsync();
+            IEnumerable<Placemark> placemarks = await Geocoding.GetPlacemarksAsync(location.Latitude, location.Longitude);
+            var placemark = placemarks?.FirstOrDefault();
+
+            if (placemark != null)
+            {
+                CountryName = placemark.CountryName;
+                CountryCode = placemark.CountryCode;
+                CityName = placemark.FeatureName;
+            }
+
+            using (UserDialogs.Instance.Loading("Loading..."))
+            {
+                GetWeatherReport(false, location);
+            }
+
+            UserDialogs.Instance.HideLoading();
         }
 
-        private double ConvertTempToCelsius(double temp) => (temp - 32) * 5 / 9;
+        public override void ViewAppeared()
+        {
+            MessagingCenter.Subscribe<WeatherViewModel>(this, "RefreshContent", (viewModel) =>
+            {
+                MainThread.BeginInvokeOnMainThread(async () =>
+                {
+                    await LoadWeatherInformationAsync();
+                });
+            });
+        }
+
+        public override void ViewDestroy(bool viewFinishing = true)
+        {
+            MessagingCenter.Unsubscribe<WeatherViewModel>(this, "RefreshContent");
+            base.ViewDestroy(viewFinishing);
+        }
+
+        public IObservable<RootObject> GetForecastForFiveDay(Location location)
+        {
+            var currentCulture = CultureInfo.CurrentCulture.Parent.Name;
+
+            return BlobCache.LocalMachine.GetAndFetchLatest("fiveDayForecast",
+            async () => await _openWeather.GetForecastForFiveDaysAsync(location.Latitude, location.Longitude, currentCulture), (offset) =>
+            {
+                return Connectivity.NetworkAccess == NetworkAccess.None ? false : (DateTimeOffset.Now - offset).Minutes > 2;
+            });
+        }
+
+        public IObservable<UvIndex> GetUltraVioletIndex(Location location)
+        {
+            return BlobCache.LocalMachine.GetAndFetchLatest("ultraVioletIndex",
+            async () => await _openWeather.GetUltraVioletIndexAsync(location.Latitude, location.Longitude), (offset) =>
+            {
+                return Connectivity.NetworkAccess == NetworkAccess.None ? false : (DateTimeOffset.Now - offset).Minutes > 2;
+            });
+        }
 
         #endregion
 
         #region Events
 
-        public override async Task Initialize()
-        {
-            try
-            {
-                //get the current location coordinates
-                var request = new GeolocationRequest(GeolocationAccuracy.Medium);
-
-                //using (UserDialogs.Instance.Loading("Loading..."))
-                //{
-                //    //something can go wrong and if it does, it needs to be logged!
-                //    try
-                //    {
-                //        //check if its the emulator or the device, i should be getting an exception here
-                //        //Location location = await Geolocation.GetLocationAsync(new GeolocationRequest() { DesiredAccuracy = GeolocationAccuracy.Medium, Timeout = TimeSpan.FromSeconds(2) });
-
-                //        //this causes erros for now
-                //        //get the city & country
-                //        //var placemarks = await Geocoding.GetPlacemarksAsync(location.Latitude, location.Longitude);
-                //        //var placemark = placemarks?.FirstOrDefault();
-
-                //        //if (placemark != null)
-                //        //{
-                //        //    CountryName = placemark.CountryName;
-                //        //    CountryCode = placemark.CountryCode;
-                //        //    CityName = placemark.FeatureName;
-                //        //}
-
-                //        //await GetWeatherReport(request, false, location);
-                //    }
-
-                //    catch (Exception ex)
-                //    {
-                //        Analytics.TrackEvent("Something went wrong with the api call");
-                //        Crashes.TrackError(ex);
-                //    }
-                //}
-                //UserDialogs.Instance.HideLoading();
-            }
-            catch (FeatureNotSupportedException fnsEx)
-            {
-                // Handle not supported on device exception
-                Analytics.TrackEvent("FeatureNotSupportedException ");
-                Crashes.TrackError(fnsEx);
-            }
-            catch (FeatureNotEnabledException fneEx)
-            {
-                Analytics.TrackEvent("Handle not enabled on device exception ");
-                Crashes.TrackError(fneEx);
-            }
-            catch (PermissionException pEx)
-            {
-                Mvx.IoCProvider.Resolve<IUserDialogs>().Alert("Permission to use the currrent location needs to be granted, no data will be loaded");
-                Analytics.TrackEvent("Handle permission exception");
-                Crashes.TrackError(pEx);
-            }
-            catch (Exception ex)
-            {
-                Analytics.TrackEvent("Unable to get location ");
-                Crashes.TrackError(ex);
-            }
-        }
-
-        private async Task GetWeatherReport(GeolocationRequest request, bool getCurrentDayReport, Location location)
+        private void GetWeatherReport(bool getCurrentDayReport, Location location)
         {
             try
             {
                 if (!getCurrentDayReport)
                 {
-                    RootObject rootObject =
-                        await _weatherWebServiceProvider.GetForecastForFiveDays(location.Latitude, location.Longitude,
-                            IsCelsiusSelected);
-                    List<WeatherPageViewModel> currentForecast = new List<WeatherPageViewModel>();
+                    var currentCulture = CultureInfo.CurrentCulture.Parent.Name;
 
-                    foreach (var forecast in rootObject.list)
+                    GetForecastForFiveDay(location).Subscribe((fiveDayForecast) =>
                     {
-                        //in US format
-                        DateTime date = Convert.ToDateTime(forecast.dt_txt, CultureInfo.InvariantCulture);
-                        var selectedForecast = currentForecast.FirstOrDefault(x => x.Date.Date == date.Date);
+                        MainThread.BeginInvokeOnMainThread(() =>
+                            {
+                                currentForecast = new List<WeatherPageViewModel>();
 
-                        if (selectedForecast == null)
-                            currentForecast.Add(new WeatherPageViewModel(forecast, date));
-                        else
-                        {
-                            selectedForecast.WindCollection.Add(forecast.wind);
-                            selectedForecast.CloudsCollection.Add(forecast.clouds);
-                            selectedForecast.DateCollection.Add(date);
-                            selectedForecast.WeatherCollection.Add(forecast.weather[0]);
-                            selectedForecast.WeatherMainCollection.Add(forecast.main);
-                        }
-                    }
-                }
+                                ForecastInformation = new ForecastInformationViewModel
+                                {
+                                    ForecastInformationCollection = new MvxObservableCollection<Models.ForecastInformation>()
+                                };
 
-                else
-                {
-                    RootObject rootObject =
-                        await _weatherWebServiceProvider.GetCurrentForecast(location.Latitude, location.Longitude,
-                            IsCelsiusSelected);
-                    Forecast = new WeatherPageViewModel(rootObject);
+                                foreach (List forecast in fiveDayForecast.list)
+                                {
+                                    //date is in US format
+                                    var date = Convert.ToDateTime(forecast.dt_txt, CultureInfo.InvariantCulture);
+                                    WeatherPageViewModel selectedForecast = currentForecast.FirstOrDefault(x => x.Date.Date == date.Date);
+
+                                    if (selectedForecast == null)
+                                        currentForecast.Add(new WeatherPageViewModel(forecast, date));
+                                    else
+                                    {
+                                        selectedForecast.WeatherCollection.Add(forecast.weather[0]);
+                                        selectedForecast.TemperatureInformationCollection.Add(new Models.TemperatureInformation(date, forecast.main));
+                                        selectedForecast.WindInformationCollection.Add(new Models.WindInformation(date, forecast.wind));
+                                        //selectedForecast.SystemInformationCollection.Add(new Models.SysInformation(date, forecast.sys));
+                                    }
+                                }
+
+                                foreach (WeatherPageViewModel forecast in currentForecast)
+                                {
+                                    ForecastInformation.ForecastInformationCollection.Add(new Models.ForecastInformation(forecast.Date, forecast.TemperatureInformationCollection, forecast.WindInformationCollection[0], forecast.WeatherCollection));
+                                }
+
+                                if (currentForecast.Any())
+                                {
+                                    Forecast = currentForecast[0];
+
+                                    GetUltraVioletIndex(location).Subscribe((ultraVioletIndex) =>
+                                    {
+                                        Forecast.CurrentUvIndex = ultraVioletIndex?.value.ToString();
+                                    });
+
+                                    Forecast.CurrentHumidity = currentForecast[0].TemperatureInformationCollection[0].WeatherMain.humidity.ToString();
+                                    Forecast.CurentPressure = currentForecast[0].TemperatureInformationCollection[0].WeatherMain.pressure.ToString();
+                                    Forecast.CurrentWeatherDescription = currentForecast[0].WeatherCollection[0].description;
+                                }
+                                //pass things as aprams and navigate, don t want this right now
+                                //await _navigationService.Navigate<WeatherPageViewModel, WeatherPageViewModel>(Forecast);
+
+                                if (currentForecast.Count > 2)
+                                {
+                                    TomorrowForecast = currentForecast[1];
+                                    TomorrowForecast.CurrentHumidity = Math.Round(currentForecast[1].TemperatureInformationCollection.Average(x => x.WeatherMain.humidity), 2).ToString();
+                                    TomorrowForecast.CurentPressure = Math.Round(currentForecast[1].TemperatureInformationCollection.Average(x => x.WeatherMain.pressure), 2).ToString();
+
+                                    //using the 1st element for this one...
+                                    TomorrowForecast.CurrentWeatherDescription = currentForecast[1].WeatherCollection[0].description;
+                                }
+
+                                IsFinishedLoading = true;
+                            });
+                    });
                 }
             }
             catch (Exception ex)
             {
                 Analytics.TrackEvent("Error getting weather report ");
                 Crashes.TrackError(ex);
+
+                //error getitng reports, show something to the user
+                Forecast = new WeatherPageViewModel { IsDataValid = false, Message = Localizations.WeatherMainPageLocalization.ERROR_GETTING_WEATHER_FORECAST };
+                TomorrowForecast = new WeatherPageViewModel { IsDataValid = false, Message = Localizations.WeatherMainPageLocalization.ERROR_GETTING_WEATHER_FORECAST };
+                ForecastInformation = new ForecastInformationViewModel { IsDataValid = false, Message = Localizations.WeatherMainPageLocalization.ERROR_GETTING_WEATHER_FORECAST };
+
+                IsFinishedLoading = true;
+            }
+        }
+
+        private async void Connectivity_ConnectivityChangedAsync(object sender, ConnectivityChangedEventArgs e)
+        {
+            NetworkAccess networkAccess = e.NetworkAccess;
+
+            //reconnected to the internet, refresh!
+            if (networkAccess == NetworkAccess.Internet)
+            {
+                await LoadWeatherInformationAsync();
             }
         }
 
