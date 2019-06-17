@@ -280,6 +280,7 @@ namespace XamarinFormsWeatherApp.Weather.ViewModels
             base.ViewDestroy(viewFinishing);
         }
 
+        //the api refreshes every 2h so only after 1h have passed will the cache be updated 
         public IObservable<RootObject> GetForecastForFiveDay(Location location)
         {
             var currentCulture = CultureInfo.CurrentCulture.Parent.Name;
@@ -287,7 +288,7 @@ namespace XamarinFormsWeatherApp.Weather.ViewModels
             return BlobCache.LocalMachine.GetAndFetchLatest("fiveDayForecast",
             async () => await _openWeather.GetForecastForFiveDaysAsync(location.Latitude, location.Longitude, currentCulture), (offset) =>
             {
-                return Connectivity.NetworkAccess == NetworkAccess.None ? false : (DateTimeOffset.Now - offset).Minutes > 2;
+                return Connectivity.NetworkAccess == NetworkAccess.None ? false : (DateTimeOffset.Now - offset).Hours > 1;
             });
         }
 
@@ -296,7 +297,7 @@ namespace XamarinFormsWeatherApp.Weather.ViewModels
             return BlobCache.LocalMachine.GetAndFetchLatest("ultraVioletIndex",
             async () => await _openWeather.GetUltraVioletIndexAsync(location.Latitude, location.Longitude), (offset) =>
             {
-                return Connectivity.NetworkAccess == NetworkAccess.None ? false : (DateTimeOffset.Now - offset).Minutes > 2;
+                return Connectivity.NetworkAccess == NetworkAccess.None ? false : (DateTimeOffset.Now - offset).Hours > 1;
             });
         }
 
