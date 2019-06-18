@@ -5,7 +5,7 @@ using System.Text;
 using System.Windows.Input;
 using Xamarin.Forms;
 
-namespace XamarinFormsWeatherApp.Behaviours
+namespace XamarinFormsWeatherApp.Behaviors
 {
     public class EventToCommandBehavior : BehaviorBase<View>
     {

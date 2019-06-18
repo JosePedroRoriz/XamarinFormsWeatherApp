@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using Xamarin.Forms;
 
-namespace XamarinFormsWeatherApp.Behaviours
+namespace XamarinFormsWeatherApp.Behaviors
 {
     public class BehaviorBase<T> : Behavior<T> where T : BindableObject
     {
@@ -29,7 +29,7 @@ namespace XamarinFormsWeatherApp.Behaviours
             AssociatedObject = null;
         }
 
-        void OnBindingContextChanged(object sender, EventArgs e)
+        private void OnBindingContextChanged(object sender, EventArgs e)
         {
             OnBindingContextChanged();
         }

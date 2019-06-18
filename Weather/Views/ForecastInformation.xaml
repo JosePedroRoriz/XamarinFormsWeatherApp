@@ -6,7 +6,7 @@
              xmlns:d="http://xamarin.com/schemas/2014/forms/design"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:controls="clr-namespace:Refractored.XamForms.PullToRefresh;assembly=Refractored.XamForms.PullToRefresh"
-                      xmlns:local="clr-namespace:XamarinFormsWeatherApp.Behaviours"
+                      xmlns:local="clr-namespace:XamarinFormsWeatherApp.Behaviors"
                       mc:Ignorable="d"
              x:Name="WeekForecastPage"
              x:Class="XamarinFormsWeatherApp.Weather.Views.ForecastInformation">
