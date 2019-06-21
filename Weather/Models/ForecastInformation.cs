@@ -1,53 +1,45 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
-using MvvmCross.ViewModels;
-using WeatherWebservices.OpenWeatherModels;
 using Xamarin.Forms;
+using XamarinFormsWeatherApp.Weather.Interfaces;
 
 namespace XamarinFormsWeatherApp.Weather.Models
 {
-    public class ForecastInformation : WeatherInformation
+    public class ForecastInformation : IWeatherInformation, IForecastInformation
     {
-        private DateTime date;
-        private WindInformation windInformation;
-        private MvxObservableCollection<WeatherWebservices.OpenWeatherModels.Weather> weatherCollection;
-
-        public ForecastInformation(DateTime date, MvxObservableCollection<TemperatureInformation> temperatureInformationCollection, WindInformation windInformation, MvxObservableCollection<WeatherWebservices.OpenWeatherModels.Weather> weatherCollection)
+        public ForecastInformation(DateTime date, IEnumerable<ITemperatureInformation> temperatureInformation, IWindInformation windInformation, string weatherDesc)
         {
             DayForecast = date;
-
-            MinTemp = temperatureInformationCollection[0].WeatherMain.temp_min;
-            MaxTemp = temperatureInformationCollection[0].WeatherMain.temp_max;
-            Humidity = Math.Round(temperatureInformationCollection.Average(x => x.WeatherMain.humidity), 2).ToString();
-
-            TemperatureInformationCollection = temperatureInformationCollection;
-            Description = weatherCollection[0].description;
-            Pressure = Math.Round(temperatureInformationCollection.Average(x => x.WeatherMain.pressure), 2).ToString();
-            WindSpeed = windInformation.Wind.speed;
+            TemperatureInformationCollection = temperatureInformation;
+            WindInformation = windInformation;
+            Description = weatherDesc;
+            SetTemperatureValues(temperatureInformation);
         }
 
+        private void SetTemperatureValues(IEnumerable<ITemperatureInformation> temperatureInformation)
+        {
+            MinTemp = temperatureInformation.FirstOrDefault().WeatherMain.temp_min;
+            MaxTemp = temperatureInformation.FirstOrDefault().WeatherMain.temp_max;
 
+            Pressure = Math.Round(temperatureInformation.Average(x => x.WeatherMain.pressure), 2).ToString();
+            Humidity = Math.Round(temperatureInformation.Average(x => x.WeatherMain.humidity), 2).ToString();
+        }
+
+        public IWindInformation WindInformation { get; set; }
 
         public double MinTemp { get; set; }
         public double MaxTemp { get; set; }
 
-
-        public MvxObservableCollection<TemperatureInformation> TemperatureInformationCollection { get; set; }
+        public IEnumerable<ITemperatureInformation> TemperatureInformationCollection { get; set; }
 
         //part of the "hidden group"
-        public double WindSpeed { get; set; }
 
         public string Humidity { get; set; }
         public string Pressure { get; set; }
-
         public bool IsVisible { get; set; }
-
         public string Description { get; set; }
-
-        public FontAttributes FontWeight {get;set; }
-
+        public FontAttributes FontWeight { get; set; }
+        public DateTime DayForecast { get; set; }
     }
 }

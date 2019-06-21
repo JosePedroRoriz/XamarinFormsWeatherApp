@@ -1,4 +1,4 @@
-﻿using MvvmCross.Navigation;
+using MvvmCross.Navigation;
 using MvvmCross.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -26,13 +26,6 @@ namespace XamarinFormsWeatherApp.ViewModels
         public override void ViewAppearing()
         {
             base.ViewAppearing();
-
-            MvxNotifyTask.Create(async () => await this.InitializeViewModels());
-        }
-
-        private async Task InitializeViewModels()
-        {
-           //add vms to initialize
         }
 
         #endregion

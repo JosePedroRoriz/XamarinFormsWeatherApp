@@ -61,7 +61,7 @@
 
                                         <StackLayout>
                                             <Label Text="Wind" FontAttributes="Bold"/>
-                                            <Label Text="{Binding WindSpeed,StringFormat='{0} Km/h'}" />
+                                            <Label Text="{Binding WindInformation.Wind.speed,StringFormat='{0} Km/h'}" />
                                         </StackLayout>
 
                                         <StackLayout Grid.Row="1" Grid.Column="0">

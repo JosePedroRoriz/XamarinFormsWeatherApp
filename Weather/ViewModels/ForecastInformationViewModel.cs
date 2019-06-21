@@ -2,6 +2,7 @@ using MvvmCross.ViewModels;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Xamarin.Forms;
+using XamarinFormsWeatherApp.Weather.Interfaces;
 using XamarinFormsWeatherApp.Weather.Models;
 
 namespace XamarinFormsWeatherApp.Weather.ViewModels
@@ -9,7 +10,7 @@ namespace XamarinFormsWeatherApp.Weather.ViewModels
     public class ForecastInformationViewModel : WeatherViewModel
     {
         private bool _isVisible;
-        private MvxObservableCollection<ForecastInformation> _forecastInformationCollection;
+        private MvxObservableCollection<IForecastInformation> _forecastInformationCollection;
         private ForecastInformation _oldforecastInformation;
         private ForecastInformation _selectedItem;
 
@@ -21,7 +22,7 @@ namespace XamarinFormsWeatherApp.Weather.ViewModels
 
         #region Properties 
 
-        public MvxObservableCollection<ForecastInformation> ForecastInformationCollection
+        public MvxObservableCollection<IForecastInformation> ForecastInformationCollection
         {
             get => _forecastInformationCollection;
             set

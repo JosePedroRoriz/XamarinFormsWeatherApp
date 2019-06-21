@@ -28,7 +28,7 @@ namespace XamarinFormsWeatherApp.Converters
                 }
                 return  new GridLength(0, GridUnitType.Absolute);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return null;
             }

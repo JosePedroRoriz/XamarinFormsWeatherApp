@@ -2,10 +2,13 @@ using Acr.UserDialogs;
 using MvvmCross;
 using MvvmCross.IoC;
 using MvvmCross.ViewModels;
+using System;
 using System.Globalization;
 using System.Threading;
+using WeatherWebservices.OpenWeatherModels;
 using Xamarin.Forms;
 using XamarinFormsWeatherApp.Localizations;
+using XamarinFormsWeatherApp.Weather.Models;
 
 namespace XamarinFormsWeatherApp
 {
@@ -31,6 +34,9 @@ namespace XamarinFormsWeatherApp
             Mvx.IoCProvider.ConstructAndRegisterSingleton<IMvxAppStart, AppStart>();
 
             Mvx.IoCProvider.RegisterSingleton(() => UserDialogs.Instance);
+
+            //weather ioc
+            Mvx.IoCProvider.RegisterType<ITemperatureInformation, TemperatureInformation>();
 
             // request a reference to the constructed appstart object 
             var appStart = Mvx.IoCProvider.Resolve<IMvxAppStart>();

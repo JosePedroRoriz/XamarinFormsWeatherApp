@@ -1,8 +1,9 @@
+using MvvmCross;
 using MvvmCross.ViewModels;
 using System;
 using WeatherWebservices.OpenWeatherModels;
-using Xamarin.Essentials;
-using Xamarin.Forms;
+using XamarinFormsWeatherApp.Remove;
+using XamarinFormsWeatherApp.Weather.Interfaces;
 using XamarinFormsWeatherApp.Weather.Models;
 
 namespace XamarinFormsWeatherApp.Weather.ViewModels
@@ -12,18 +13,15 @@ namespace XamarinFormsWeatherApp.Weather.ViewModels
         #region Variables
 
         private DateTime _date;
-        private Main _weatherMain;
-
-        private MvxObservableCollection<WeatherWebservices.OpenWeatherModels.Weather> _weatherCollection;
         private MvxObservableCollection<Clouds> _cloudsCollection;
-        private MvxObservableCollection<TemperatureInformation> _temperatureInformationCollection;
-        private MvxObservableCollection<WindInformation> _windInformationCollection;
+        private MvxObservableCollection<ITemperatureInformation> _temperatureInformationCollection;
+        private MvxObservableCollection<IWindInformation> _windInformationCollection;
         private string _currentUvIndex;
         private string _currentHumidity;
         private string _curentPressure;
         private string _sunsetSunrise;
         private string _currentWeatherDescription;
-        private MvxObservableCollection<SysInformation> _systemInformationCollection;
+        private MvxObservableCollection<ISysInformation> _systemInformationCollection;
 
         #endregion
 
@@ -35,17 +33,18 @@ namespace XamarinFormsWeatherApp.Weather.ViewModels
 
         public WeatherPageViewModel(List reportList, DateTime date)
         {
+            IsDataValid = true;
             Date = date;
 
-            WeatherCollection = new MvxObservableCollection<WeatherWebservices.OpenWeatherModels.Weather> { reportList.weather[0] };
-            IsDataValid = true;
-            CloudsCollection = new MvxObservableCollection<Clouds> { reportList.clouds };
+            ITemperatureInformation temperature = Mvx.IoCProvider.Resolve<ITemperatureInformation>();
+            temperature.SetTemperatureInformation(date, reportList.main);
+            TemperatureInformationCollection = new MvxObservableCollection<ITemperatureInformation>() { temperature };
 
-            TemperatureInformationCollection = new MvxObservableCollection<TemperatureInformation> { new TemperatureInformation(date, reportList.main) };
-            WindInformationCollection = new MvxObservableCollection<WindInformation> { new WindInformation(date, reportList.wind) };
+            //TemperatureInformationCollection = new MvxObservableCollection<ITemperatureInformation>{WeatherFactory.GetTemperatureInformation(date, reportList.main) };
+            WindInformationCollection = new MvxObservableCollection<IWindInformation> { WeatherFactory.GetWindInformation(date, reportList.wind) };
+            SystemInformationCollection = new MvxObservableCollection<ISysInformation>();
 
-            //waiting on a api update so i can use this...
-            //SystemInformationCollection = new MvxObservableCollection<SysInformation> { new SysInformation(date, reportList.sys) };
+            CurrentWeatherDescription = reportList.weather[0].description;
         }
 
         #endregion
@@ -62,27 +61,7 @@ namespace XamarinFormsWeatherApp.Weather.ViewModels
             }
         }
 
-        public MvxObservableCollection<WeatherWebservices.OpenWeatherModels.Weather> WeatherCollection
-        {
-            get => _weatherCollection;
-            set
-            {
-                _weatherCollection = value;
-                RaisePropertyChanged(() => WeatherCollection);
-            }
-        }
-
-        public Main WeatherMain
-        {
-            get => _weatherMain;
-            set
-            {
-                _weatherMain = value;
-                RaisePropertyChanged(() => WeatherMain);
-            }
-        }
-
-        public MvxObservableCollection<TemperatureInformation> TemperatureInformationCollection
+        public MvxObservableCollection<ITemperatureInformation> TemperatureInformationCollection
         {
             get => _temperatureInformationCollection;
             set
@@ -92,7 +71,7 @@ namespace XamarinFormsWeatherApp.Weather.ViewModels
             }
         }
 
-        public MvxObservableCollection<WindInformation> WindInformationCollection
+        public MvxObservableCollection<IWindInformation> WindInformationCollection
         {
             get => _windInformationCollection;
             set
@@ -112,7 +91,7 @@ namespace XamarinFormsWeatherApp.Weather.ViewModels
             }
         }
 
-        public MvxObservableCollection<SysInformation> SystemInformationCollection
+        public MvxObservableCollection<ISysInformation> SystemInformationCollection
         {
             get => _systemInformationCollection;
             set
