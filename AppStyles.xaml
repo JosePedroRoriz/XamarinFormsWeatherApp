@@ -6,7 +6,6 @@
     <Application.Resources>
         <ResourceDictionary>
             <class:HideGridElementOnNull  x:Key="HideGridElementOnNull"/>
-            <class:ToUpperOrLower x:Key="ToUpperOrLower" />
             <class:UpperCaseFirstLetter x:Key="UpperCaseFirstLetter" />
             <class:InverseBooleanConverter x:Key="InverseBooleanConverter" />
             <Color x:Key="NavigationPrimary">#2196F3</Color>
@@ -14,6 +13,18 @@
                 <Setter Property="BarBackgroundColor" Value="{StaticResource NavigationPrimary}" />
                 <Setter Property="BarTextColor" Value="White" />
             </Style>
+
+            <DataTemplate x:Key="temperatureInfoTemplate">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height = "auto" />
+                        <RowDefinition Height = "Auto" />
+                    </Grid.RowDefinitions>
+                    <Label Text="{Binding WeatherMain.temp, StringFormat='{0}º'}" />
+                    <Label Grid.Row="1" Text="{Binding DayForecast, StringFormat='{}{0:HH:mm}'}"/>
+                </Grid>
+            </DataTemplate>
+            
         </ResourceDictionary>
     </Application.Resources>
 </Application>

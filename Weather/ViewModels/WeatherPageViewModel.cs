@@ -1,8 +1,6 @@
-using MvvmCross;
 using MvvmCross.ViewModels;
 using System;
 using WeatherWebservices.OpenWeatherModels;
-using XamarinFormsWeatherApp.Remove;
 using XamarinFormsWeatherApp.Weather.Interfaces;
 using XamarinFormsWeatherApp.Weather.Models;
 
@@ -31,19 +29,14 @@ namespace XamarinFormsWeatherApp.Weather.ViewModels
 
         }
 
-        public WeatherPageViewModel(List reportList, DateTime date)
+        public WeatherPageViewModel(List reportList, DateTime date, IWindInformation windInformation, ITemperatureInformation temperature)
         {
             IsDataValid = true;
             Date = date;
 
-            ITemperatureInformation temperature = Mvx.IoCProvider.Resolve<ITemperatureInformation>();
-            temperature.SetTemperatureInformation(date, reportList.main);
             TemperatureInformationCollection = new MvxObservableCollection<ITemperatureInformation>() { temperature };
-
-            //TemperatureInformationCollection = new MvxObservableCollection<ITemperatureInformation>{WeatherFactory.GetTemperatureInformation(date, reportList.main) };
-            WindInformationCollection = new MvxObservableCollection<IWindInformation> { WeatherFactory.GetWindInformation(date, reportList.wind) };
+            WindInformationCollection = new MvxObservableCollection<IWindInformation> { windInformation };
             SystemInformationCollection = new MvxObservableCollection<ISysInformation>();
-
             CurrentWeatherDescription = reportList.weather[0].description;
         }
 

@@ -16,7 +16,6 @@ using WeatherWebservices.OpenWeatherModels;
 using WebServices;
 using Xamarin.Essentials;
 using Xamarin.Forms;
-using XamarinFormsWeatherApp.Remove;
 using XamarinFormsWeatherApp.Weather.Interfaces;
 using XamarinFormsWeatherApp.Weather.Models;
 
@@ -40,22 +39,18 @@ namespace XamarinFormsWeatherApp.Weather.ViewModels
         private const string Fahrenheit = "Fº";
         private const string Celsius = "Cº";
 
-        private readonly IMvxNavigationService _navigationService;
         private IOpenWeather _openWeather;
         private bool _isFinishedLoading;
-
-        private List<WeatherPageViewModel> currentForecast;
 
         #endregion
 
         #region Constructor
 
-        public WeatherContainer(IMvxNavigationService navigation)
+        public WeatherContainer()
         {
             IsCelsiusSelected = true;
             CurrentTempMode = Celsius;
 
-            _navigationService = navigation;
             _openWeather = WeatherWebServiceProvider.Instance;
             Connectivity.ConnectivityChanged += Connectivity_ConnectivityChangedAsync;
         }
@@ -177,12 +172,7 @@ namespace XamarinFormsWeatherApp.Weather.ViewModels
 
         #endregion
 
-        #region Commands
-
-
-        #endregion
-
-        #region Private Methods 
+        #region  Methods 
 
         public override async void ViewAppearing()
         {
@@ -190,7 +180,7 @@ namespace XamarinFormsWeatherApp.Weather.ViewModels
             {
                 try
                 {
-                    var networkAccess = Connectivity.NetworkAccess;
+                    NetworkAccess networkAccess = Connectivity.NetworkAccess;
 
                     if (networkAccess == NetworkAccess.None)
                     {
@@ -247,7 +237,7 @@ namespace XamarinFormsWeatherApp.Weather.ViewModels
         {
             Location location = await Geolocation.GetLastKnownLocationAsync();
             IEnumerable<Placemark> placemarks = await Geocoding.GetPlacemarksAsync(location.Latitude, location.Longitude);
-            var placemark = placemarks?.FirstOrDefault();
+            Placemark placemark = placemarks?.FirstOrDefault();
 
             if (placemark != null)
             {
@@ -287,24 +277,16 @@ namespace XamarinFormsWeatherApp.Weather.ViewModels
             var currentCulture = CultureInfo.CurrentCulture.Parent.Name;
 
             return BlobCache.LocalMachine.GetAndFetchLatest("fiveDayForecast",
-            async () => await _openWeather.GetForecastForFiveDaysAsync(location.Latitude, location.Longitude, currentCulture), (offset) =>
-            {
-                return Connectivity.NetworkAccess == NetworkAccess.None ? false : (DateTimeOffset.Now - offset).Hours > 1;
-            });
+                async () => await _openWeather.GetForecastForFiveDaysAsync(location.Latitude, location.Longitude, currentCulture), (offset) =>
+                    Connectivity.NetworkAccess != NetworkAccess.None && (DateTimeOffset.Now - offset).Hours > 1);
         }
 
         public IObservable<UvIndex> GetUltraVioletIndex(Location location)
         {
             return BlobCache.LocalMachine.GetAndFetchLatest("ultraVioletIndex",
             async () => await _openWeather.GetUltraVioletIndexAsync(location.Latitude, location.Longitude), (offset) =>
-            {
-                return Connectivity.NetworkAccess == NetworkAccess.None ? false : (DateTimeOffset.Now - offset).Hours > 1;
-            });
+                Connectivity.NetworkAccess != NetworkAccess.None && (DateTimeOffset.Now - offset).Hours > 1);
         }
-
-        #endregion
-
-        #region Events
 
         private void GetWeatherReport(bool getCurrentDayReport, Location location)
         {
@@ -312,90 +294,137 @@ namespace XamarinFormsWeatherApp.Weather.ViewModels
             {
                 if (!getCurrentDayReport)
                 {
-                    var currentCulture = CultureInfo.CurrentCulture.Parent.Name;
-
                     GetForecastForFiveDay(location).Subscribe(async (fiveDayForecast) =>
-                    {
-                        await Task.Run(() =>
-                            {
-                                currentForecast = new List<WeatherPageViewModel>();
-
-                                ForecastInformation = new ForecastInformationViewModel
                                 {
-                                    ForecastInformationCollection = new MvxObservableCollection<IForecastInformation>()
-                                };
-
-                                foreach (List forecast in fiveDayForecast.list)
-                                {
-                                    //date is in US format
-                                    var date = Convert.ToDateTime(forecast.dt_txt, CultureInfo.InvariantCulture);
-                                    WeatherPageViewModel selectedForecast = currentForecast.FirstOrDefault(x => x.Date.Date == date.Date);
-
-                                    if (selectedForecast == null)
-                                        currentForecast.Add(new WeatherPageViewModel(forecast, date));
-                                    else
+                                    await Task.Run(() =>
                                     {
-                                        //selectedForecast.WeatherCollection.Add(WeatherFactory.GetWeatherInformation(forecast.weather[0]));
-                                        //selectedForecast.TemperatureInformationCollection.Add(WeatherFactory.GetTemperatureInformation(date, forecast.main));
-                                        ITemperatureInformation temperature = Mvx.IoCProvider.Resolve<ITemperatureInformation>();
-                                        temperature.SetTemperatureInformation(date, forecast.main);
-                                        selectedForecast.TemperatureInformationCollection.Add(temperature);
-                                        selectedForecast.WindInformationCollection.Add(WeatherFactory.GetWindInformation(date, forecast.wind));
-                                        selectedForecast.SystemInformationCollection.Add(WeatherFactory.GetSysInformation(date, forecast.sys));
+                                        var currentForecast = new List<WeatherPageViewModel>();
 
-                                        //selectedForecast.WeatherCollection.Add(WeatherFactory.GetWeatherInformation(forecast.weather[0]));
-                                    }
-                                }
+                                        ForecastInformation = new ForecastInformationViewModel
+                                        {
+                                            ForecastInformationCollection = new MvxObservableCollection<IForecastInformation>()
+                                        };
 
-                                foreach (WeatherPageViewModel forecast in currentForecast)
-                                {
-                                    ForecastInformation.ForecastInformationCollection.Add(new Models.ForecastInformation(forecast.Date, forecast.TemperatureInformationCollection, forecast.WindInformationCollection[0], forecast.CurrentWeatherDescription));
-                                }
+                                        if (!ValidateWeatherData(fiveDayForecast))
+                                        {
+                                            IsFinishedLoading = true;
+                                            return;
+                                        }
 
-                                if (currentForecast.Any())
-                                {
-                                    Forecast = currentForecast[0];
+                                        foreach (List forecast in fiveDayForecast.list)
+                                        {
+                                            var date = Convert.ToDateTime(forecast.dt_txt, CultureInfo.InvariantCulture);
+                                            WeatherPageViewModel selectedForecast = currentForecast.FirstOrDefault(x => x.Date.Date == date.Date);
 
-                                    GetUltraVioletIndex(location).Subscribe((ultraVioletIndex) =>
-                                    {
-                                        Forecast.CurrentUvIndex = ultraVioletIndex?.value.ToString();
+                                            IWindInformation windInformation = Mvx.IoCProvider.Resolve<IWindInformation>();
+                                            windInformation.SetWindInformation(date, forecast.wind);
+
+                                            ITemperatureInformation temperature = Mvx.IoCProvider.Resolve<ITemperatureInformation>();
+                                            temperature.SetTemperatureInformation(date, forecast.main);
+
+                                            //waiting on an api update
+                                            //ISysInformation sysInformation = Mvx.IoCProvider.Resolve<ISysInformation>();
+                                            //sysInformation.SetSysInformation(date, forecast.sys);
+
+                                            if (selectedForecast == null)
+                                                currentForecast.Add(new WeatherPageViewModel(forecast, date, windInformation, temperature));
+                                            else
+                                            {
+                                                selectedForecast.TemperatureInformationCollection.Add(temperature);
+                                                selectedForecast.WindInformationCollection.Add(windInformation);
+                                            }
+                                        }
+
+                                        SetViewModels(location, currentForecast);
+                                        IsFinishedLoading = true;
                                     });
-
-                                    Forecast.CurrentHumidity = currentForecast[0].TemperatureInformationCollection[0].WeatherMain.humidity.ToString();
-                                    Forecast.CurentPressure = currentForecast[0].TemperatureInformationCollection[0].WeatherMain.pressure.ToString();
-                                    //Forecast.CurrentWeatherDescription = currentForecast[0].WeatherCollection[0].description;
-                                }
-                                //pass things as aprams and navigate, don t want this right now
-                                //await _navigationService.Navigate<WeatherPageViewModel, WeatherPageViewModel>(Forecast);
-
-                                if (currentForecast.Count > 2)
-                                {
-                                    TomorrowForecast = currentForecast[1];
-                                    TomorrowForecast.CurrentHumidity = Math.Round(currentForecast[1].TemperatureInformationCollection.Average(x => x.WeatherMain.humidity), 2).ToString();
-                                    TomorrowForecast.CurentPressure = Math.Round(currentForecast[1].TemperatureInformationCollection.Average(x => x.WeatherMain.pressure), 2).ToString();
-
-                                    //using the 1st element for this one...
-                                    //TomorrowForecast.CurrentWeatherDescription = currentForecast[1].WeatherCollection[0].description;
-                                }
-
-                                IsFinishedLoading = true;
-                            });
-                    });
+                                });
                 }
             }
             catch (Exception ex)
             {
-                Analytics.TrackEvent("Error getting weather report ");
+                Analytics.TrackEvent("Error getting weather report");
                 Crashes.TrackError(ex);
 
-                //error getitng reports, show something to the user
-                Forecast = new WeatherPageViewModel { IsDataValid = false, Message = Localizations.WeatherMainPageLocalization.ERROR_GETTING_WEATHER_FORECAST };
-                TomorrowForecast = new WeatherPageViewModel { IsDataValid = false, Message = Localizations.WeatherMainPageLocalization.ERROR_GETTING_WEATHER_FORECAST };
-                ForecastInformation = new ForecastInformationViewModel { IsDataValid = false, Message = Localizations.WeatherMainPageLocalization.ERROR_GETTING_WEATHER_FORECAST };
-
+                SetErrorGettingWeatherDetailsMessage();
                 IsFinishedLoading = true;
             }
         }
+
+        public bool ValidateWeatherData(RootObject fiveDayForecast)
+        {
+            if (fiveDayForecast == null || (fiveDayForecast.list == null && !fiveDayForecast.list.Any()))
+            {
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    SetErrorGettingWeatherDetailsMessage();
+                });
+
+                return false;
+            }
+
+            return true;
+        }
+
+        private void SetErrorGettingWeatherDetailsMessage()
+        {
+            Forecast = new WeatherPageViewModel { IsDataValid = false, Message = Localizations.WeatherMainPageLocalization.ERROR_GETTING_WEATHER_FORECAST };
+            TomorrowForecast = new WeatherPageViewModel { IsDataValid = false, Message = Localizations.WeatherMainPageLocalization.ERROR_GETTING_WEATHER_FORECAST };
+            ForecastInformation = new ForecastInformationViewModel { IsDataValid = false, Message = Localizations.WeatherMainPageLocalization.ERROR_GETTING_WEATHER_FORECAST };
+        }
+
+        private void SetViewModels(Location location, List<WeatherPageViewModel> currentForecast)
+        {
+            if (currentForecast.Any())
+            {
+                SetForecastInformation(currentForecast);
+                SetCurrentForecast(location, currentForecast);
+                SetTomorrowForecast(currentForecast);
+            }
+
+            else
+            {
+                SetErrorGettingWeatherDetailsMessage();
+            }
+        }
+
+        private void SetTomorrowForecast(List<WeatherPageViewModel> currentForecast)
+        {
+            if (currentForecast.Count > 1)
+            {
+                TomorrowForecast = currentForecast[1];
+                TomorrowForecast.CurrentHumidity = Math.Round(currentForecast[1].TemperatureInformationCollection.Average(x => x.WeatherMain.humidity), 2).ToString(CultureInfo.InvariantCulture);
+                TomorrowForecast.CurentPressure = Math.Round(currentForecast[1].TemperatureInformationCollection.Average(x => x.WeatherMain.pressure), 2).ToString(CultureInfo.InvariantCulture);
+            }
+
+            else
+                TomorrowForecast = new WeatherPageViewModel { IsDataValid = false, Message = Localizations.WeatherMainPageLocalization.ERROR_GETTING_WEATHER_FORECAST };
+        }
+
+        private void SetCurrentForecast(Location location, List<WeatherPageViewModel> currentForecast)
+        {
+            Forecast = currentForecast[0];
+
+            GetUltraVioletIndex(location).Subscribe((ultraVioletIndex) =>
+            {
+                Forecast.CurrentUvIndex = ultraVioletIndex?.value.ToString(CultureInfo.InvariantCulture);
+            });
+
+            Forecast.CurrentHumidity = currentForecast[0].TemperatureInformationCollection[0].WeatherMain.humidity.ToString();
+            Forecast.CurentPressure = currentForecast[0].TemperatureInformationCollection[0].WeatherMain.pressure.ToString(CultureInfo.InvariantCulture);
+        }
+
+        private void SetForecastInformation(List<WeatherPageViewModel> currentForecast)
+        {
+            foreach (WeatherPageViewModel forecast in currentForecast)
+            {
+                ForecastInformation.ForecastInformationCollection.Add(new ForecastInformation(forecast.Date, forecast.TemperatureInformationCollection, forecast.WindInformationCollection[0], forecast.CurrentWeatherDescription));
+            }
+        }
+
+        #endregion
+
+        #region Events
 
         private async void Connectivity_ConnectivityChangedAsync(object sender, ConnectivityChangedEventArgs e)
         {
@@ -406,11 +435,6 @@ namespace XamarinFormsWeatherApp.Weather.ViewModels
             {
                 await LoadWeatherInformationAsync();
             }
-        }
-
-        public string GetCurrentUvIndex(UvIndex uvIndex)
-        {
-            return uvIndex?.value.ToString();
         }
 
         #endregion

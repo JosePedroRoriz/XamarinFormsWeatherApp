@@ -8,5 +8,7 @@ namespace XamarinFormsWeatherApp.Weather.Interfaces
     public interface ISysInformation : IWeatherInformation
     {
         Sys SystemInfo { get; set; }
+
+        //void SetSysInformation(DateTime date, Sys sys);
     }
 }

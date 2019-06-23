@@ -41,20 +41,8 @@
                             </Grid.RowDefinitions>
                             <Label Text="{x:Static localize:WeatherMainPageLocalization.TEMPERATURE}" FontAttributes="Bold"/>
                             <ScrollView Orientation="Horizontal" Grid.Row="1">
-                                <StackLayout Orientation = "Horizontal" BindableLayout.ItemsSource = "{Binding TemperatureInformationCollection}" >
-                                    <BindableLayout.ItemTemplate>
-                                        <DataTemplate>
-                                            <Grid>
-                                                <Grid.RowDefinitions>
-                                                    <RowDefinition Height = "auto" />
-                                                    <RowDefinition Height = "auto" />
-                                                </Grid.RowDefinitions>
-                                                <Label Text="{Binding WeatherMain.temp, StringFormat='{0}º'}" />
-                                                <Label Grid.Row="1" Text="{Binding DayForecast, StringFormat='{}{0:HH:mm}'}" />
-                                            </Grid>
-                                        </DataTemplate>
-                                    </BindableLayout.ItemTemplate>
-                                </StackLayout>
+                                <StackLayout Orientation = "Horizontal" BindableLayout.ItemsSource = "{Binding TemperatureInformationCollection}" 
+                                             BindableLayout.ItemTemplate="{StaticResource temperatureInfoTemplate}" />
                             </ScrollView>
                         </Grid>
 

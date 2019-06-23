@@ -20,7 +20,7 @@ namespace XamarinFormsWeatherApp.Converters
                 transformedString += char.ToUpperInvariant(item[0]) + item.Substring(1) + " ";
             }
 
-            return transformedString;
+            return transformedString.Trim();
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

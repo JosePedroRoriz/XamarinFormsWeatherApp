@@ -13,7 +13,7 @@ namespace XamarinFormsWeatherApp.Weather.ViewModels
         private string _message;
         private bool _isBusy;
 
-        public WeatherViewModel()
+        protected WeatherViewModel()
         {
             RefreshData = new Command(RefreshDataExecute);
         }

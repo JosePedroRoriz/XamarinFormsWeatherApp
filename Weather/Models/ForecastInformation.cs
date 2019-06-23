@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using Xamarin.Forms;
 using XamarinFormsWeatherApp.Weather.Interfaces;
@@ -11,10 +12,12 @@ namespace XamarinFormsWeatherApp.Weather.Models
         public ForecastInformation(DateTime date, IEnumerable<ITemperatureInformation> temperatureInformation, IWindInformation windInformation, string weatherDesc)
         {
             DayForecast = date;
-            TemperatureInformationCollection = temperatureInformation;
+
+            IEnumerable<ITemperatureInformation> temperatureInformationCollection = temperatureInformation.ToList();
+            TemperatureInformationCollection = temperatureInformationCollection;
             WindInformation = windInformation;
             Description = weatherDesc;
-            SetTemperatureValues(temperatureInformation);
+            SetTemperatureValues(temperatureInformationCollection);
         }
 
         private void SetTemperatureValues(IEnumerable<ITemperatureInformation> temperatureInformation)
@@ -22,8 +25,8 @@ namespace XamarinFormsWeatherApp.Weather.Models
             MinTemp = temperatureInformation.FirstOrDefault().WeatherMain.temp_min;
             MaxTemp = temperatureInformation.FirstOrDefault().WeatherMain.temp_max;
 
-            Pressure = Math.Round(temperatureInformation.Average(x => x.WeatherMain.pressure), 2).ToString();
-            Humidity = Math.Round(temperatureInformation.Average(x => x.WeatherMain.humidity), 2).ToString();
+            Pressure = Math.Round(temperatureInformation.Average(x => x.WeatherMain.pressure), 2).ToString(CultureInfo.InvariantCulture);
+            Humidity = Math.Round(temperatureInformation.Average(x => x.WeatherMain.humidity), 2).ToString(CultureInfo.InvariantCulture);
         }
 
         public IWindInformation WindInformation { get; set; }

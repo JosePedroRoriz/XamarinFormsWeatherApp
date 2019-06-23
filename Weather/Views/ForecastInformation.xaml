@@ -77,20 +77,8 @@
                                         <Label Text="Temperature" Grid.Row="3" FontAttributes="Bold" />
 
                                         <ScrollView Grid.Row="4" Orientation="Horizontal">
-                                            <StackLayout Orientation = "Horizontal" BindableLayout.ItemsSource = "{Binding TemperatureInformationCollection}" Padding="0,0,0,10">
-                                                <BindableLayout.ItemTemplate>
-                                                    <DataTemplate>
-                                                        <Grid>
-                                                            <Grid.RowDefinitions>
-                                                                <RowDefinition Height = "*" />
-                                                                <RowDefinition Height = "Auto" />
-                                                            </Grid.RowDefinitions>
-                                                            <Label Text="{Binding WeatherMain.temp, StringFormat='{0}º'}" />
-                                                            <Label Grid.Row="1" Text="{Binding DayForecast, StringFormat='{}{0:HH:mm}'}"/>
-                                                        </Grid>
-                                                    </DataTemplate>
-                                                </BindableLayout.ItemTemplate>
-                                            </StackLayout>
+                                            <StackLayout Orientation = "Horizontal" BindableLayout.ItemsSource = "{Binding TemperatureInformationCollection}" 
+                                                         Padding="0,0,0,10" BindableLayout.ItemTemplate="{StaticResource temperatureInfoTemplate}" />
                                         </ScrollView>
                                     </Grid>
                                 </Grid>

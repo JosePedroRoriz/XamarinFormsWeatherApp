@@ -1,13 +1,12 @@
 using Acr.UserDialogs;
+using Akavache;
 using MvvmCross;
 using MvvmCross.IoC;
 using MvvmCross.ViewModels;
-using System;
 using System.Globalization;
-using System.Threading;
-using WeatherWebservices.OpenWeatherModels;
 using Xamarin.Forms;
 using XamarinFormsWeatherApp.Localizations;
+using XamarinFormsWeatherApp.Weather.Interfaces;
 using XamarinFormsWeatherApp.Weather.Models;
 
 namespace XamarinFormsWeatherApp
@@ -18,12 +17,15 @@ namespace XamarinFormsWeatherApp
         {
             if (Device.RuntimePlatform == Device.iOS || Device.RuntimePlatform == Device.Android)
             {
-                var ci = DependencyService.Get<ILocalize>().GetCurrentCultureInfo();
+                CultureInfo ci = DependencyService.Get<ILocalize>().GetCurrentCultureInfo();
                 WeatherMainPageLocalization.Culture = ci;
                 DependencyService.Get<ILocalize>().SetLocale(ci);
             }
 
-            Akavache.BlobCache.ApplicationName = "XamarinFormsWeatherApp";
+            BlobCache.ApplicationName = "XamarinFormsWeatherApp";
+
+            BlobCache.LocalMachine.InvalidateAll();
+            BlobCache.LocalMachine.Vacuum();
 
             //uncomment to test pt strings
             //WeatherMainPageLocalization.Culture = new CultureInfo("pt-PT");
@@ -37,9 +39,11 @@ namespace XamarinFormsWeatherApp
 
             //weather ioc
             Mvx.IoCProvider.RegisterType<ITemperatureInformation, TemperatureInformation>();
+            Mvx.IoCProvider.RegisterType<IWindInformation, WindInformation>();
+            Mvx.IoCProvider.RegisterType<ISysInformation, SysInformation>();
 
             // request a reference to the constructed appstart object 
-            var appStart = Mvx.IoCProvider.Resolve<IMvxAppStart>();
+            IMvxAppStart appStart = Mvx.IoCProvider.Resolve<IMvxAppStart>();
 
             // register the appstart object
             RegisterAppStart(appStart);
