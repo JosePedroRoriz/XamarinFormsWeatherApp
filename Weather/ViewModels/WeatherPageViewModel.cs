@@ -1,5 +1,7 @@
 using MvvmCross.ViewModels;
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using WeatherWebservices.OpenWeatherModels;
 using XamarinFormsWeatherApp.Weather.Interfaces;
 using XamarinFormsWeatherApp.Weather.Models;
@@ -12,7 +14,7 @@ namespace XamarinFormsWeatherApp.Weather.ViewModels
 
         private DateTime _date;
         private MvxObservableCollection<Clouds> _cloudsCollection;
-        private MvxObservableCollection<ITemperatureInformation> _temperatureInformationCollection;
+        private ObservableCollection<ITemperatureInformation> _temperatureInformationCollection;
         private MvxObservableCollection<IWindInformation> _windInformationCollection;
         private string _currentUvIndex;
         private string _currentHumidity;
@@ -29,7 +31,7 @@ namespace XamarinFormsWeatherApp.Weather.ViewModels
 
         }
 
-        public WeatherPageViewModel(List reportList, DateTime date, IWindInformation windInformation, ITemperatureInformation temperature)
+        public WeatherPageViewModel(string description, DateTime date, IWindInformation windInformation, ITemperatureInformation temperature)
         {
             IsDataValid = true;
             Date = date;
@@ -37,7 +39,7 @@ namespace XamarinFormsWeatherApp.Weather.ViewModels
             TemperatureInformationCollection = new MvxObservableCollection<ITemperatureInformation>() { temperature };
             WindInformationCollection = new MvxObservableCollection<IWindInformation> { windInformation };
             SystemInformationCollection = new MvxObservableCollection<ISysInformation>();
-            CurrentWeatherDescription = reportList.weather[0].description;
+            CurrentWeatherDescription = description;
         }
 
         #endregion
@@ -54,7 +56,7 @@ namespace XamarinFormsWeatherApp.Weather.ViewModels
             }
         }
 
-        public MvxObservableCollection<ITemperatureInformation> TemperatureInformationCollection
+        public ObservableCollection<ITemperatureInformation> TemperatureInformationCollection
         {
             get => _temperatureInformationCollection;
             set

@@ -12,10 +12,12 @@
 
   <ItemGroup>
     <Compile Remove="App.xaml.cs" />
+    <Compile Remove="Weather\Views\WeatherMainPage - Copy.xaml.cs" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Remove="App.xaml" />
+    <EmbeddedResource Remove="Weather\Views\WeatherMainPage - Copy.xaml" />
   </ItemGroup>
 
   <ItemGroup>

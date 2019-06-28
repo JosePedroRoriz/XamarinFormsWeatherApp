@@ -52,7 +52,6 @@ namespace XamarinFormsWeatherApp.Weather.ViewModels
             CurrentTempMode = Celsius;
 
             _openWeather = WeatherWebServiceProvider.Instance;
-            Connectivity.ConnectivityChanged += Connectivity_ConnectivityChangedAsync;
         }
 
         #endregion
@@ -174,6 +173,12 @@ namespace XamarinFormsWeatherApp.Weather.ViewModels
 
         #region  Methods 
 
+        public override Task Initialize()
+        {
+            Connectivity.ConnectivityChanged += Connectivity_ConnectivityChangedAsync;
+            return base.Initialize();
+        }
+
         public override async void ViewAppearing()
         {
             await Task.Run(async () =>
@@ -271,7 +276,9 @@ namespace XamarinFormsWeatherApp.Weather.ViewModels
             base.ViewDestroy(viewFinishing);
         }
 
-        //the api refreshes every 2h so only after 1h have passed will the cache be updated 
+        //the api refreshes every 2h so only after 1h have passed will the cache be updated
+
+        //TODO: adding the cache broke the try catch to deal with requests exceptions, must fix to continue unit testing 
         public IObservable<RootObject> GetForecastForFiveDay(Location location)
         {
             var currentCulture = CultureInfo.CurrentCulture.Parent.Name;
@@ -327,7 +334,7 @@ namespace XamarinFormsWeatherApp.Weather.ViewModels
                                             //sysInformation.SetSysInformation(date, forecast.sys);
 
                                             if (selectedForecast == null)
-                                                currentForecast.Add(new WeatherPageViewModel(forecast, date, windInformation, temperature));
+                                                currentForecast.Add(new WeatherPageViewModel(forecast.weather[0].description, date, windInformation, temperature));
                                             else
                                             {
                                                 selectedForecast.TemperatureInformationCollection.Add(temperature);
@@ -387,8 +394,8 @@ namespace XamarinFormsWeatherApp.Weather.ViewModels
                 SetErrorGettingWeatherDetailsMessage();
             }
         }
-
-        private void SetTomorrowForecast(List<WeatherPageViewModel> currentForecast)
+        
+        public void SetTomorrowForecast(List<WeatherPageViewModel> currentForecast)
         {
             if (currentForecast.Count > 1)
             {
