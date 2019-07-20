@@ -9,7 +9,7 @@ namespace XamarinFormsWeatherApp.Weather.Models
 {
     public class ForecastInformation : IWeatherInformation, IForecastInformation
     {
-        public ForecastInformation(DateTime date, IEnumerable<ITemperatureInformation> temperatureInformation, IWindInformation windInformation, string weatherDesc)
+        public void SetForecastInformation(DateTime date, IEnumerable<ITemperatureInformation> temperatureInformation, IWindInformation windInformation, string weatherDesc)
         {
             DayForecast = date;
 

@@ -17,5 +17,8 @@ namespace XamarinFormsWeatherApp.Weather.Interfaces
         string Pressure { get; set; }
         IEnumerable<ITemperatureInformation> TemperatureInformationCollection { get; set; }
         IWindInformation WindInformation { get; set; }
+
+        void SetForecastInformation(DateTime date, IEnumerable<ITemperatureInformation> temperatureInformation,
+            IWindInformation windInformation, string weatherDesc);
     }
 }

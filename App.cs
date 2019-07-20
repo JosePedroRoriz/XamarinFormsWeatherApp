@@ -39,6 +39,7 @@ namespace XamarinFormsWeatherApp
 
             //weather ioc
             Mvx.IoCProvider.RegisterType<ITemperatureInformation, TemperatureInformation>();
+            Mvx.IoCProvider.RegisterType<IForecastInformation, ForecastInformation>();
             Mvx.IoCProvider.RegisterType<IWindInformation, WindInformation>();
             Mvx.IoCProvider.RegisterType<ISysInformation, SysInformation>();
 

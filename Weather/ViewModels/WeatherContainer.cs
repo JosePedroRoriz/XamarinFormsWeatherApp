@@ -3,13 +3,11 @@ using Akavache;
 using Microsoft.AppCenter.Analytics;
 using Microsoft.AppCenter.Crashes;
 using MvvmCross;
-using MvvmCross.Navigation;
 using MvvmCross.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Reactive.Linq;
 using System.Threading.Tasks;
 using WeatherWebservices;
 using WeatherWebservices.OpenWeatherModels;
@@ -36,7 +34,6 @@ namespace XamarinFormsWeatherApp.Weather.ViewModels
         private string _selectedCity;
         private bool _isRefreshing;
 
-        private const string Fahrenheit = "Fº";
         private const string Celsius = "Cº";
 
         private IOpenWeather _openWeather;
@@ -278,7 +275,6 @@ namespace XamarinFormsWeatherApp.Weather.ViewModels
 
         //the api refreshes every 2h so only after 1h have passed will the cache be updated
 
-        //TODO: adding the cache broke the try catch to deal with requests exceptions, must fix to continue unit testing 
         public IObservable<RootObject> GetForecastForFiveDay(Location location)
         {
             var currentCulture = CultureInfo.CurrentCulture.Parent.Name;
@@ -362,10 +358,7 @@ namespace XamarinFormsWeatherApp.Weather.ViewModels
         {
             if (fiveDayForecast == null || (fiveDayForecast.list == null && !fiveDayForecast.list.Any()))
             {
-                MainThread.BeginInvokeOnMainThread(() =>
-                {
-                    SetErrorGettingWeatherDetailsMessage();
-                });
+                MainThread.BeginInvokeOnMainThread(SetErrorGettingWeatherDetailsMessage);
 
                 return false;
             }
@@ -390,9 +383,7 @@ namespace XamarinFormsWeatherApp.Weather.ViewModels
             }
 
             else
-            {
                 SetErrorGettingWeatherDetailsMessage();
-            }
         }
         
         public void SetTomorrowForecast(List<WeatherPageViewModel> currentForecast)
@@ -425,7 +416,9 @@ namespace XamarinFormsWeatherApp.Weather.ViewModels
         {
             foreach (WeatherPageViewModel forecast in currentForecast)
             {
-                ForecastInformation.ForecastInformationCollection.Add(new ForecastInformation(forecast.Date, forecast.TemperatureInformationCollection, forecast.WindInformationCollection[0], forecast.CurrentWeatherDescription));
+                IForecastInformation forecastInformation = Mvx.IoCProvider.Resolve<IForecastInformation>();
+                forecastInformation.SetForecastInformation(forecast.Date, forecast.TemperatureInformationCollection, forecast.WindInformationCollection[0], forecast.CurrentWeatherDescription);
+                ForecastInformation.ForecastInformationCollection.Add(forecastInformation);
             }
         }
 

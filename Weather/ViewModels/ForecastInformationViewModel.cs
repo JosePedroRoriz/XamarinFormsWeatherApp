@@ -1,6 +1,4 @@
 using MvvmCross.ViewModels;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Xamarin.Forms;
 using XamarinFormsWeatherApp.Weather.Interfaces;
 using XamarinFormsWeatherApp.Weather.Models;
@@ -11,7 +9,7 @@ namespace XamarinFormsWeatherApp.Weather.ViewModels
     {
         private bool _isVisible;
         private MvxObservableCollection<IForecastInformation> _forecastInformationCollection;
-        private ForecastInformation _oldforecastInformation;
+        private ForecastInformation _oldForecastInformation;
         private ForecastInformation _selectedItem;
 
         public ForecastInformationViewModel()
@@ -60,7 +58,7 @@ namespace XamarinFormsWeatherApp.Weather.ViewModels
 
         private void ToggleWeatherDataCommandExecute()
         {
-            if (_oldforecastInformation == SelectedItem)
+            if (_oldForecastInformation == SelectedItem)
             {
                 SelectedItem.IsVisible = !SelectedItem.IsVisible;
                 SelectedItem.FontWeight = SelectedItem.FontWeight == FontAttributes.Bold ? FontAttributes.None : FontAttributes.Bold;
@@ -68,12 +66,12 @@ namespace XamarinFormsWeatherApp.Weather.ViewModels
             }
             else
             {
-                if (_oldforecastInformation != null)
+                if (_oldForecastInformation != null)
                 {
-                    _oldforecastInformation.IsVisible = false;
-                    _oldforecastInformation.FontWeight = FontAttributes.None;
+                    _oldForecastInformation.IsVisible = false;
+                    _oldForecastInformation.FontWeight = FontAttributes.None;
                     SelectedItem.FontWeight = FontAttributes.Bold;
-                    UpdateForecastItem(_oldforecastInformation);
+                    UpdateForecastItem(_oldForecastInformation);
 
                 }
 
@@ -81,16 +79,16 @@ namespace XamarinFormsWeatherApp.Weather.ViewModels
                 SelectedItem.FontWeight = FontAttributes.Bold;
                 UpdateForecastItem(SelectedItem);
             }
-            _oldforecastInformation = SelectedItem;
+            _oldForecastInformation = SelectedItem;
         }
 
         #endregion
 
         private void UpdateForecastItem(ForecastInformation forecastInformation)
         {
-            var Index = ForecastInformationCollection.IndexOf(forecastInformation);
+            var index = ForecastInformationCollection.IndexOf(forecastInformation);
             ForecastInformationCollection.Remove(forecastInformation);
-            ForecastInformationCollection.Insert(Index, forecastInformation);
+            ForecastInformationCollection.Insert(index, forecastInformation);
         }
     }
 }
