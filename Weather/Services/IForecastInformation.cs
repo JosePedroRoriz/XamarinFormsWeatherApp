@@ -9,7 +9,6 @@ namespace XamarinFormsWeatherApp.Weather.Interfaces
     {
         DateTime DayForecast { get; set; }
         string Description { get; set; }
-        FontAttributes FontWeight { get; set; }
         string Humidity { get; set; }
         bool IsVisible { get; set; }
         double MaxTemp { get; set; }

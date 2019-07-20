@@ -61,24 +61,21 @@ namespace XamarinFormsWeatherApp.Weather.ViewModels
             if (_oldForecastInformation == SelectedItem)
             {
                 SelectedItem.IsVisible = !SelectedItem.IsVisible;
-                SelectedItem.FontWeight = SelectedItem.FontWeight == FontAttributes.Bold ? FontAttributes.None : FontAttributes.Bold;
                 UpdateForecastItem(SelectedItem);
             }
+
             else
             {
                 if (_oldForecastInformation != null)
                 {
                     _oldForecastInformation.IsVisible = false;
-                    _oldForecastInformation.FontWeight = FontAttributes.None;
-                    SelectedItem.FontWeight = FontAttributes.Bold;
                     UpdateForecastItem(_oldForecastInformation);
-
                 }
 
                 SelectedItem.IsVisible = true;
-                SelectedItem.FontWeight = FontAttributes.Bold;
                 UpdateForecastItem(SelectedItem);
             }
+
             _oldForecastInformation = SelectedItem;
         }
 

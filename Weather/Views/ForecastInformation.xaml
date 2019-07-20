@@ -39,7 +39,13 @@
                                         <ColumnDefinition />
                                     </Grid.ColumnDefinitions>
 
-                                    <Label Grid.Column="0" Grid.Row="0" Text="{Binding Description, Converter={StaticResource UpperCaseFirstLetter}}" FontAttributes="{Binding FontWeight}"/>
+                                    <Label Grid.Column="0" Grid.Row="0" Text="{Binding Description, Converter={StaticResource UpperCaseFirstLetter}}" >
+                                        <Label.Triggers>
+                                            <DataTrigger TargetType="Label"  Binding="{Binding IsVisible}" Value="True">
+                                                <Setter Property="FontAttributes" Value="Bold"></Setter>
+                                            </DataTrigger>
+                                        </Label.Triggers>
+                                    </Label>
                                     <Label Grid.Row="1" Grid.Column="0" Text="{Binding DayForecast, StringFormat='{}{0:MMM dd}'}" />
 
                                     <Label Grid.Row="0" Grid.Column="1" Text="{Binding MaxTemp, StringFormat='{0}º'}" HorizontalOptions="End"/>

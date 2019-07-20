@@ -24,7 +24,6 @@
                     <Label Grid.Row="1" Text="{Binding DayForecast, StringFormat='{}{0:HH:mm}'}"/>
                 </Grid>
             </DataTemplate>
-            
         </ResourceDictionary>
     </Application.Resources>
 </Application>
