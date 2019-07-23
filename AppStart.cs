@@ -1,4 +1,4 @@
-﻿using Microsoft.AppCenter;
+using Microsoft.AppCenter;
 using Microsoft.AppCenter.Analytics;
 using Microsoft.AppCenter.Crashes;
 using MvvmCross.Navigation;
@@ -18,7 +18,7 @@ namespace XamarinFormsWeatherApp
         {
             _mvxNavigationService = mvxNavigationService;
 
-            AppCenter.Start("android=587116ff-fe34-430f-a2d6-2fac8dcf1f20;",
+            AppCenter.Start("app store key",
                typeof(Analytics), typeof(Crashes));
         }
 

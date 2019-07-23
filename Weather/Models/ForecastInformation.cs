@@ -42,7 +42,6 @@ namespace XamarinFormsWeatherApp.Weather.Models
         public string Pressure { get; set; }
         public bool IsVisible { get; set; }
         public string Description { get; set; }
-        public FontAttributes FontWeight { get; set; }
         public DateTime DayForecast { get; set; }
     }
 }
