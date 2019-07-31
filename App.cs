@@ -4,6 +4,8 @@ using MvvmCross;
 using MvvmCross.IoC;
 using MvvmCross.ViewModels;
 using System.Globalization;
+using WeatherWebservices;
+using WebServices;
 using Xamarin.Forms;
 using XamarinFormsWeatherApp.Localizations;
 using XamarinFormsWeatherApp.Weather.Interfaces;
@@ -36,6 +38,7 @@ namespace XamarinFormsWeatherApp
             Mvx.IoCProvider.ConstructAndRegisterSingleton<IMvxAppStart, AppStart>();
 
             Mvx.IoCProvider.RegisterSingleton(() => UserDialogs.Instance);
+            Mvx.IoCProvider.RegisterSingleton<IOpenWeather>(WeatherWebServiceProvider.Instance);
 
             //weather ioc
             Mvx.IoCProvider.RegisterType<ITemperatureInformation, TemperatureInformation>();

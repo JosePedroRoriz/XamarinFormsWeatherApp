@@ -48,7 +48,7 @@ namespace XamarinFormsWeatherApp.Weather.ViewModels
             IsCelsiusSelected = true;
             CurrentTempMode = Celsius;
 
-            _openWeather = WeatherWebServiceProvider.Instance;
+            _openWeather = Mvx.IoCProvider.Resolve<IOpenWeather>();
         }
 
         #endregion
